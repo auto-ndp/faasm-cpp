@@ -1,0 +1,9 @@
+# SPEC benchmarks
+nab/*
+!nab/src
+nab/src/Makefile
+!nab/*.txt
+lbm/*
+!lbm/CMakeLists.txt
+povray/*
+!povray/CMakeLists.txt
