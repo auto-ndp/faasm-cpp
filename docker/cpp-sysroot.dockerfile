@@ -28,6 +28,7 @@ RUN git submodule update --init -f third-party/eigen
 RUN git submodule update --init -f third-party/faabric
 RUN git submodule update --init -f third-party/faasm-clapack
 RUN git submodule update --init -f third-party/libffi
+RUN git submodule update --init -f third-party/llvm-project
 RUN git submodule update --init -f third-party/wasi-libc
 
 # Install the faasmtools Python lib
