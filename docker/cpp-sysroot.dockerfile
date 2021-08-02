@@ -1,6 +1,6 @@
-FROM faasm/llvm:10.0.1 as llvm
+FROM kubasz51/faasm-llvm:10.0.1 as llvm
 
-FROM faasm/faabric:0.1.1
+FROM kubasz51/faasm-faabric:0.1.1
 ARG SYSROOT_VERSION
 
 # Copy the toolchain in from the LLVM container
@@ -14,11 +14,13 @@ RUN apt install -y \
     libtool \
     python3-dev \
     python3-venv \
+    gdb \
+    zsh \
     python3-pip
 
 # Get the code
 WORKDIR /code
-RUN git clone -b v${SYSROOT_VERSION} https://github.com/faasm/cpp
+RUN git clone -b v${SYSROOT_VERSION} https://github.com/auto-ndp/faasm-cpp
 WORKDIR /code/cpp
 
 # Update submodules (not LLVM)

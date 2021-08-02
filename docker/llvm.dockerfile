@@ -2,7 +2,7 @@ FROM ubuntu:20.04
 
 RUN apt update
 RUN apt install -y software-properties-common
-RUN apt update 
+RUN apt update
 RUN apt upgrade -y
 
 RUN apt install -y \
@@ -17,7 +17,7 @@ RUN apt install -y \
 # Up-to-date CMake
 RUN apt remove --purge --auto-remove cmake
 WORKDIR /setup
-RUN wget -q -O cmake-linux.sh https://github.com/Kitware/CMake/releases/download/v3.18.2/cmake-3.18.2-Linux-x86_64.sh
+RUN wget -q -O cmake-linux.sh https://github.com/Kitware/CMake/releases/download/v3.21.1/cmake-3.21.1-Linux-x86_64.sh
 RUN sh cmake-linux.sh -- --skip-license --prefix=/usr/local
 
 # Tidy up
