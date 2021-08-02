@@ -20,7 +20,7 @@ RUN apt install -y \
 
 # Get the code
 WORKDIR /code
-RUN git clone -b v${SYSROOT_VERSION} https://github.com/auto-ndp/faasm-cpp
+RUN git clone -b v${SYSROOT_VERSION} https://github.com/auto-ndp/faasm-cpp cpp
 WORKDIR /code/cpp
 
 # Update submodules (not LLVM)
@@ -28,7 +28,6 @@ RUN git submodule update --init -f third-party/eigen
 RUN git submodule update --init -f third-party/faabric
 RUN git submodule update --init -f third-party/faasm-clapack
 RUN git submodule update --init -f third-party/libffi
-RUN git submodule update --init -f third-party/llvm-project
 RUN git submodule update --init -f third-party/wasi-libc
 
 # Install the faasmtools Python lib
