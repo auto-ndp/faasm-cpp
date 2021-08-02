@@ -1,11 +1,19 @@
 #ifdef IN_FAASM
 #error Trying to compile PIN-compatible emulation in faasm mode
 #endif
+#include <algorithm>
 #include <faasm/faasm.h>
 #include <ndpapi.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stublib.h>
+#include <utility>
+#include <vector>
+
+namespace {
+std::vector<std::pair<uint8_t*, size_t>> mmaps;
+}
 
 int32_t __faasmndp_put(const uint8_t* keyPtr,
                        uint32_t keyLen,
@@ -20,12 +28,29 @@ uint8_t* __faasmndp_getMmap(const uint8_t* keyPtr,
                             uint32_t maxRequestedLen,
                             uint32_t* outDataLenPtr)
 {
-    return 0;
+    FILE* fp = fopen((const char*)keyPtr, "rb");
+    size_t size = 0;
+    fseek(fp, 0, SEEK_END);
+    size = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+    uint8_t* data = (uint8_t*)calloc(size + 32, 1);
+    size = fread(data, 1, size, fp);
+    fclose(fp);
+    *outDataLenPtr = std::min(maxRequestedLen, (uint32_t)size);
+    mmaps.push_back(std::make_pair(data, size));
+    return data;
 }
 
 int __faasmndp_storageCallAndAwait(FaasmNdpFuncPtr funcPtr)
 {
-    return funcPtr();
+    pinnearmap_phase("offloaded");
+    int val = funcPtr();
+    pinnearmap_phase("post-offloaded");
+    for (auto [ptr, size] : mmaps) {
+        memset(ptr, 0, size);
+    }
+    mmaps.clear();
+    return val;
 }
 
 const char* FAASM_INPUT_ENV = "FAASM_INPUT";

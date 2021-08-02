@@ -7,3 +7,6 @@ lbm/*
 !lbm/CMakeLists.txt
 povray/*
 !povray/CMakeLists.txt
+ndp/data
+ndp/json_parse_emu
+ndp/*.csv

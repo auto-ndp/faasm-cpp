@@ -17,6 +17,7 @@ ndp_func(put_simple put_simple.cpp)
 ndp_func(thumbnailer thumbnailer.cpp)
 ndp_func(wordcount wordcount.cpp)
 ndp_func(wordcount_manual_ndp wordcount_manual_ndp.cpp)
+ndp_func(json_parse json_parse.cpp)
 
 # 23/09/2020 - removing simd
 # WASM-only functions
