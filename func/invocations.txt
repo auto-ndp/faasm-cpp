@@ -4,3 +4,7 @@ inv invoke.invoke nab nab -c '1am0 1122214447 122'
 inv invoke.invoke lbm lbm -c '3000 reference.dat 0 0 100_100_130_ldc.of'
 
 inv invoke.invoke povray povray -c 'SPEC-benchmark-ref.ini'
+
+inv invoke.invoke ndp wordcount -i 'frankenmod.txt'
+
+inv invoke.invoke ndp wordcount_manual_ndp -i 'frankenmod.txt'
