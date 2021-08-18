@@ -1,6 +1,6 @@
 FROM kubasz51/faasm-llvm:10.0.1 as llvm
 
-FROM kubasz51/faasm-faabric:0.1.1
+FROM kubasz51/faasm-faabric:0.1.2
 ARG SYSROOT_VERSION
 
 # Copy the toolchain in from the LLVM container
@@ -63,7 +63,7 @@ RUN inv install
 RUN inv libc
 RUN inv libffi
 RUN inv eigen
-RUN inv ffmpeg
+#RUN inv ffmpeg
 
 # Both static and shared clapack
 RUN inv clapack
