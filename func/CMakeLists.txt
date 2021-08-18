@@ -55,7 +55,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Wasm")
         # We need to export all symbols to make them available to the
         # dynamically loaded modules
         set_target_properties(${func_name} PROPERTIES
-                LINK_FLAGS "-Xlinker --export-all -Xlinker --no-gc-sections"                
+                LINK_FLAGS "-Xlinker --export-all -Xlinker --no-gc-sections"
                 )
 
     endfunction(faasm_dynamic_func)
@@ -90,6 +90,7 @@ add_subdirectory(lbm)
 add_subdirectory(darknet)
 add_subdirectory(demo)
 add_subdirectory(dynlink)
+add_subdirectory(ffmpeg)
 add_subdirectory(mpi)
 add_subdirectory(ndp)
 add_subdirectory(omp)
