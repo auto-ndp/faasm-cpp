@@ -1,6 +1,6 @@
 FROM kubasz51/faasm-llvm:10.0.1 as llvm
 
-FROM kubasz51/faasm-faabric:0.1.2
+FROM kubasz51/faasm-faabric-base:0.1.2
 ARG SYSROOT_VERSION
 
 # Copy the toolchain in from the LLVM container
@@ -74,3 +74,10 @@ RUN inv libfaasm
 RUN inv libemscripten
 RUN inv libfaasmp
 RUN inv libfaasmpi
+
+# CLI setup
+ENV TERM xterm-256color
+SHELL ["/bin/bash", "-c"]
+
+RUN echo ". /code/cpp/bin/workon.sh" >> ~/.bashrc
+CMD ["/bin/bash", "-l"]
