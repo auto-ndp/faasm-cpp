@@ -83,7 +83,7 @@ int hierarchy_top_prediction(float *predictions, tree *hier, float thresh, int s
 tree *read_tree(char *filename)
 {
     tree t = {0};
-    FILE *fp = fopen(filename, "r");
+    FILE *fp = faasmndp_fopen(filename, "r");
 
     char *line;
     int last_parent = -1;

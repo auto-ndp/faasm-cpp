@@ -25,7 +25,7 @@ int *read_tokenized_data(char *filename, size_t *read)
 {
     size_t size = 512;
     size_t count = 0;
-    FILE *fp = fopen(filename, "r");
+    FILE *fp = faasmndp_fopen(filename, "r");
     int *d = calloc(size, sizeof(int));
     int n, one;
     one = fscanf(fp, "%d", &n);
@@ -48,7 +48,7 @@ char **read_tokens(char *filename, size_t *read)
 {
     size_t size = 512;
     size_t count = 0;
-    FILE *fp = fopen(filename, "r");
+    FILE *fp = faasmndp_fopen(filename, "r");
     char **d = calloc(size, sizeof(char *));
     char *line;
     while((line=fgetl(fp)) != 0){

@@ -890,7 +890,7 @@ network *parse_network_cfg(char *filename)
 
 list *read_cfg(char *filename)
 {
-    FILE *file = fopen(filename, "r");
+    FILE *file = faasmndp_fopen(filename, "r");
     if(file == 0) file_error(filename);
     char *line;
     int nu = 0;
@@ -1224,7 +1224,7 @@ void load_weights_upto(network *net, char *filename, int start, int cutoff)
 #endif
     fprintf(stderr, "Loading weights from %s...", filename);
     fflush(stdout);
-    FILE *fp = fopen(filename, "rb");
+    FILE *fp = faasmndp_fopen(filename, "rb");
     if(!fp) file_error(filename);
 
     int major;

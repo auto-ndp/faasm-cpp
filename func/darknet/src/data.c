@@ -12,7 +12,7 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 list *get_paths(char *filename)
 {
     char *path;
-    FILE *file = fopen(filename, "r");
+    FILE *file = faasmndp_fopen(filename, "r");
     if(!file) file_error(filename);
     list *lines = make_list();
     while((path=fgetl(file))){
@@ -138,7 +138,7 @@ matrix load_image_augment_paths(char **paths, int n, int min, int max, int size,
 
 box_label *read_boxes(char *filename, int *n)
 {
-    FILE *file = fopen(filename, "r");
+    FILE *file = faasmndp_fopen(filename, "r");
     if(!file) file_error(filename);
     float x, y, h, w;
     int id;
@@ -369,7 +369,7 @@ void fill_truth_iseg(char *path, int num_boxes, float *truth, int classes, int w
     find_replace(labelpath, ".jpg", ".txt", labelpath);
     find_replace(labelpath, ".JPG", ".txt", labelpath);
     find_replace(labelpath, ".JPEG", ".txt", labelpath);
-    FILE *file = fopen(labelpath, "r");
+    FILE *file = faasmndp_fopen(labelpath, "r");
     if(!file) file_error(labelpath);
     char buff[32788];
     int id;
@@ -407,7 +407,7 @@ void fill_truth_mask(char *path, int num_boxes, float *truth, int classes, int w
     find_replace(labelpath, ".jpg", ".txt", labelpath);
     find_replace(labelpath, ".JPG", ".txt", labelpath);
     find_replace(labelpath, ".JPEG", ".txt", labelpath);
-    FILE *file = fopen(labelpath, "r");
+    FILE *file = faasmndp_fopen(labelpath, "r");
     if(!file) file_error(labelpath);
     char buff[32788];
     int id;
@@ -608,7 +608,7 @@ matrix load_regression_labels_paths(char **paths, int n, int k)
         find_replace(labelpath, ".png", ".txt", labelpath);
         find_replace(labelpath, ".tif", ".txt", labelpath);
 
-        FILE *file = fopen(labelpath, "r");
+        FILE *file = faasmndp_fopen(labelpath, "r");
         for(j = 0; j < k; ++j){
             fscanf(file, "%f", &(y.vals[i][j]));
         }
@@ -639,7 +639,7 @@ matrix load_tags_paths(char **paths, int n, int k)
         char label[4096];
         find_replace(paths[i], "images", "labels", label);
         find_replace(label, ".jpg", ".txt", label);
-        FILE *file = fopen(label, "r");
+        FILE *file = faasmndp_fopen(label, "r");
         if (!file) continue;
         //++count;
         int tag;
@@ -682,7 +682,7 @@ image get_segmentation_image(char *path, int w, int h, int classes)
     find_replace(labelpath, ".JPG", ".txt", labelpath);
     find_replace(labelpath, ".JPEG", ".txt", labelpath);
     image mask = make_image(w, h, classes);
-    FILE *file = fopen(labelpath, "r");
+    FILE *file = faasmndp_fopen(labelpath, "r");
     if(!file) file_error(labelpath);
     char buff[32788];
     int id;
@@ -713,7 +713,7 @@ image get_segmentation_image2(char *path, int w, int h, int classes)
     for(i = 0; i < w*h; ++i){
         mask.data[w*h*classes + i] = 1;
     }
-    FILE *file = fopen(labelpath, "r");
+    FILE *file = faasmndp_fopen(labelpath, "r");
     if(!file) file_error(labelpath);
     char buff[32788];
     int id;
@@ -944,7 +944,7 @@ data load_data_compare(int n, char **paths, int m, int classes, int w, int h)
         char imlabel2[4096];
         find_replace(paths[i*2],   "imgs", "labels", imlabel1);
         find_replace(imlabel1, "jpg", "txt", imlabel1);
-        FILE *fp1 = fopen(imlabel1, "r");
+        FILE *fp1 = faasmndp_fopen(imlabel1, "r");
 
         while(fscanf(fp1, "%d %f", &id, &iou) == 2){
             if (d.y.vals[i][2*id] < iou) d.y.vals[i][2*id] = iou;
@@ -952,7 +952,7 @@ data load_data_compare(int n, char **paths, int m, int classes, int w, int h)
 
         find_replace(paths[i*2+1], "imgs", "labels", imlabel2);
         find_replace(imlabel2, "jpg", "txt", imlabel2);
-        FILE *fp2 = fopen(imlabel2, "r");
+        FILE *fp2 = faasmndp_fopen(imlabel2, "r");
 
         while(fscanf(fp2, "%d %f", &id, &iou) == 2){
             if (d.y.vals[i][2*id + 1] < iou) d.y.vals[i][2*id + 1] = iou;
@@ -1429,7 +1429,7 @@ data load_cifar10_data(char *filename)
     d.X = X;
     d.y = y;
 
-    FILE *fp = fopen(filename, "rb");
+    FILE *fp = faasmndp_fopen(filename, "rb");
     if(!fp) file_error(filename);
     for(i = 0; i < 10000; ++i){
         unsigned char bytes[3073];
@@ -1492,7 +1492,7 @@ data load_all_cifar10()
     for(b = 0; b < 5; ++b){
         char buff[256];
         sprintf(buff, "data/cifar/cifar-10-batches-bin/data_batch_%d.bin", b+1);
-        FILE *fp = fopen(buff, "rb");
+        FILE *fp = faasmndp_fopen(buff, "rb");
         if(!fp) file_error(buff);
         for(i = 0; i < 10000; ++i){
             unsigned char bytes[3073];
@@ -1513,7 +1513,7 @@ data load_all_cifar10()
 
 data load_go(char *filename)
 {
-    FILE *fp = fopen(filename, "rb");
+    FILE *fp = faasmndp_fopen(filename, "rb");
     matrix X = make_matrix(3363059, 361);
     matrix y = make_matrix(3363059, 361);
     int row, col;

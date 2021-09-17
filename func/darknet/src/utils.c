@@ -62,7 +62,7 @@ int *read_map(char *filename)
     int n = 0;
     int *map = 0;
     char *str;
-    FILE *file = fopen(filename, "r");
+    FILE *file = faasmndp_fopen(filename, "r");
     if(!file) file_error(filename);
     while((str=fgetl(file))){
         ++n;
@@ -260,7 +260,7 @@ void error(const char *s)
 
 unsigned char *read_file(char *filename)
 {
-    FILE *fp = fopen(filename, "rb");
+    FILE *fp = faasmndp_fopen(filename, "rb");
     size_t size;
 
     fseek(fp, 0, SEEK_END); 

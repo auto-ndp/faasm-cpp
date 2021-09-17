@@ -132,7 +132,7 @@ float *pop_column(matrix *m, int c)
 
 matrix csv_to_matrix(char *filename)
 {
-    FILE *fp = fopen(filename, "r");
+    FILE *fp = faasmndp_fopen(filename, "r");
     if(!fp) file_error(filename);
 
     matrix m;

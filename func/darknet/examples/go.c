@@ -33,7 +33,7 @@ moves load_go_moves(char *filename)
     moves m;
     m.n = 128;
     m.data = calloc(128, sizeof(char*));
-    FILE *fp = fopen(filename, "rb");
+    FILE *fp = faasmndp_fopen(filename, "rb");
     int count = 0;
     char *line = 0;
     while ((line = fgetgo(fp))) {

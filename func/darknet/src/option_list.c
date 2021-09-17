@@ -6,7 +6,7 @@
 
 list *read_data_cfg(char *filename)
 {
-    FILE *file = fopen(filename, "r");
+    FILE *file = faasmndp_fopen(filename, "r");
     if(file == 0) file_error(filename);
     char *line;
     int nu = 0;

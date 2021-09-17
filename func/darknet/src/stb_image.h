@@ -1150,7 +1150,7 @@ static FILE *stbi__fopen(char const *filename, char const *mode)
    if (0 != fopen_s(&f, filename, mode))
       f=0;
 #else
-   f = fopen(filename, mode);
+   f = faasmndp_fopen(filename, mode);
 #endif
    return f;
 }
