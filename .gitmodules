@@ -1,6 +1,6 @@
 [submodule "third-party/wasi-libc"]
     path = third-party/wasi-libc
-    url = https://github.com/faasm/wasi-libc
+    url = https://github.com/auto-ndp/wasi-libc.git
     branch = faasm
 [submodule "third-party/llvm-project"]
     path = third-party/llvm-project
