@@ -397,8 +397,16 @@ void visualize(char *cfgfile, char *weightfile)
     visualize_network(net);
 }
 
+char** our_argv;
+
 int main(int argc, char **argv)
 {
+    // argv corruption bug workaround
+    our_argv = calloc(argc+1, sizeof(char*));
+    for (int i=0; i < argc; i++) {
+        our_argv[i] = strdup(argv[i]);
+    }
+    argv = our_argv;
     //test_resize("data/bad.jpg");
     //test_box();
     //test_convolutional_layer();
