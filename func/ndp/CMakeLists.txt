@@ -2,11 +2,13 @@ set(FAASM_USER ndp)
 
 function(ndp_func exec_name dir_path)
     faasm_func(${exec_name} ${dir_path})
+    target_include_directories(${exec_name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/api)
     set(ALL_NDP_FUNCS ${ALL_NDP_FUNCS} ${exec_name} PARENT_SCOPE)
 endfunction(ndp_func)
 
 function(ndp_func_c exec_name dir_path)
     faasm_func_c(${exec_name} ${dir_path})
+    target_include_directories(${exec_name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/api)
     set(ALL_NDP_FUNCS ${ALL_NDP_FUNCS} ${exec_name} PARENT_SCOPE)
 endfunction(ndp_func_c)
 

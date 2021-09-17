@@ -17,7 +17,7 @@ target_sources(povray PRIVATE atmosph.cpp bbox.cpp bcyl.cpp benchmark.cpp bezier
   spec_qsort/spec_qsort.c)
 
 target_include_directories(povray SYSTEM BEFORE PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/frontend"
-  "${CMAKE_CURRENT_SOURCE_DIR}/base" "${CMAKE_CURRENT_SOURCE_DIR}/spec_qsort" "${CMAKE_CURRENT_SOURCE_DIR}/../ndp")
+  "${CMAKE_CURRENT_SOURCE_DIR}/base" "${CMAKE_CURRENT_SOURCE_DIR}/spec_qsort" "${CMAKE_CURRENT_SOURCE_DIR}/../ndp/api")
 target_compile_definitions(povray PUBLIC SPEC SPECCPU NDEBUG NOPERFLIB NOREDUCE SPEC_AUTO_SUPPRESS_OPENMP IN_FAASM -Dregister=)
 set(ALL_POVRAY_FUNCS povray)
 

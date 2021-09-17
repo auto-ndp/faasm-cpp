@@ -26,7 +26,7 @@ set(DARKNET_MAIN_SRC examples/darknet.c)
 
 darknet_func(darknet ${DARKNET_MAIN_SRC})
 target_sources(darknet PRIVATE ${DARKNET_SRCS})
-target_include_directories(darknet PRIVATE src/ include/)
+target_include_directories(darknet PRIVATE src/ include/ ../ndp/api)
 
 # Custom target to group all the darknet functions
 add_custom_target(darknet_all_funcs DEPENDS ${ALL_DARKNET_FUNCS})
