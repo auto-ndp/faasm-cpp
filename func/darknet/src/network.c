@@ -50,12 +50,26 @@ load_args get_base_args(network *net)
     return args;
 }
 
+char* NDP_load_network__cfg;
+char* NDP_load_network__weights;
+network* NDP_load_network__net;
+
+int load_network_NDP() {
+    network *net = parse_network_cfg(NDP_load_network__cfg);
+    if(NDP_load_network__weights && NDP_load_network__weights[0] != 0){
+        load_weights(net, NDP_load_network__weights);
+    }
+    NDP_load_network__net = net;
+    return 0;
+}
+
 network *load_network(char *cfg, char *weights, int clear)
 {
-    network *net = parse_network_cfg(cfg);
-    if(weights && weights[0] != 0){
-        load_weights(net, weights);
-    }
+    NDP_load_network__cfg = cfg;
+    NDP_load_network__weights = weights;
+    NDP_load_network__net = NULL;
+    __faasmndp_storageCallAndAwait(&load_network_NDP);
+    network* net = NDP_load_network__net;
     if(clear) (*net->seen) = 0;
     return net;
 }
