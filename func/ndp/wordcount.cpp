@@ -14,8 +14,23 @@
 
 using std::string_view;
 
-int worker(const string_view objKey, std::vector<char>& outputBuf)
+// faasm currently doesn't support passing arguments to functions invoked,
+// overcome that with global memory for the time being
+struct NdpWorkerComm
 {
+    // input
+    string_view objKey;
+    // output
+    std::unordered_map<std::string, uint32_t> wordCounts;
+} workerComm;
+
+int ndp_worker()
+{
+    // input params
+    const auto& objKey = workerComm.objKey;
+    // output params
+    auto& wordCounts = workerComm.wordCounts;
+    // worker code [extracted]
     uint32_t fetchedLength{};
     uint8_t* objData =
       __faasmndp_getMmap(reinterpret_cast<const uint8_t*>(objKey.data()),
@@ -29,7 +44,7 @@ int worker(const string_view objKey, std::vector<char>& outputBuf)
         return 1;
     }
     string_view remainingData(reinterpret_cast<char*>(objData), fetchedLength);
-    std::unordered_map<std::string, uint32_t> wordCounts;
+    wordCounts = std::unordered_map<std::string, uint32_t>();
     for (;;) {
         while (!remainingData.empty() && remainingData[0] <= ' ') {
             remainingData = remainingData.substr(1);
@@ -46,6 +61,19 @@ int worker(const string_view objKey, std::vector<char>& outputBuf)
         remainingData = remainingData.substr(nextSpace);
         wordCounts[std::string(word)] += 1;
     }
+    return 0;
+}
+
+int worker(const string_view objKey, std::vector<char>& outputBuf)
+{
+    // NDP call into storage
+    workerComm = NdpWorkerComm();
+    workerComm.objKey = objKey;
+    int ndpRetCode = __faasmndp_storageCallAndAwait(&ndp_worker);
+    if (ndpRetCode != 0) {
+        return ndpRetCode;
+    }
+    auto& wordCounts = workerComm.wordCounts;
     // sort and output counts
     std::vector<std::pair<std::string, uint32_t>> sortedCounts;
     sortedCounts.reserve(wordCounts.size());
@@ -78,7 +106,9 @@ int main(int argc, char* argv[])
     string_view inputStr(reinterpret_cast<char*>(inputBuf.data()),
                          inputBuf.size());
     if (inputStr.size() < 1) {
-        const string_view output{ "FAILED - no key. Usage: wordcount key1..." };
+        const string_view output{
+            "FAILED - no key. Usage: wordcount key1..."
+        };
         faasmSetOutput(reinterpret_cast<const uint8_t*>(output.data()),
                        output.size());
         return 1;
