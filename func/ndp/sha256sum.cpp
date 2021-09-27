@@ -2,7 +2,7 @@
 
 #include "ndpapi.h"
 
-#include "picosha2.h"
+#include "sha2.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -31,8 +31,8 @@ int work()
                        output.size());
         return 1;
     }
-    outputHash.reserve(100);
-    outputHash = picosha2::hash256_hex_string(objData, objData + fetchedLength);
+    auto rawHash = sha256::compute(objData, fetchedLength);
+    bytes_to_hex_string(rawHash, outputHash);
     return 0;
 }
 
