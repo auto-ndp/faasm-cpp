@@ -30,6 +30,7 @@ uint8_t* __faasmndp_getMmap(const uint8_t* keyPtr,
                             uint32_t maxRequestedLen,
                             uint32_t* outDataLenPtr)
 {
+    pinnearmap_phase("ignore-fread");
     std::string fpath(reinterpret_cast<const char*>(keyPtr), size_t(keyLen));
     FILE* fp = fopen(fpath.c_str(), "rb");
     if (fp == nullptr) {
@@ -45,6 +46,7 @@ uint8_t* __faasmndp_getMmap(const uint8_t* keyPtr,
     fclose(fp);
     *outDataLenPtr = std::min(maxRequestedLen, (uint32_t)size);
     mmaps.push_back(std::make_pair(data, size));
+    pinnearmap_phase("after-fread");
     pinnearmap_io_bytes(size);
     return data;
 }
