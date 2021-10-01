@@ -2,7 +2,9 @@
 #error Trying to compile PIN-compatible emulation in faasm mode
 #endif
 #include <algorithm>
+#include <cstdlib>
 #include <faasm/faasm.h>
+#include <iostream>
 #include <ndpapi.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,8 +12,6 @@
 #include <stublib.h>
 #include <utility>
 #include <vector>
-#include <iostream>
-#include <cstdlib>
 
 namespace {
 std::vector<std::pair<uint8_t*, size_t>> mmaps;
@@ -45,6 +45,7 @@ uint8_t* __faasmndp_getMmap(const uint8_t* keyPtr,
     fclose(fp);
     *outDataLenPtr = std::min(maxRequestedLen, (uint32_t)size);
     mmaps.push_back(std::make_pair(data, size));
+    pinnearmap_io_bytes(size);
     return data;
 }
 
@@ -52,11 +53,12 @@ int __faasmndp_storageCallAndAwait(FaasmNdpFuncPtr funcPtr)
 {
     pinnearmap_phase("offloaded");
     int val = funcPtr();
-    pinnearmap_phase("post-offloaded");
+    pinnearmap_phase("ignore-mmaps-clear");
     for (auto [ptr, size] : mmaps) {
         memset(ptr, 0, size);
     }
     mmaps.clear();
+    pinnearmap_phase("post-offloaded");
     return val;
 }
 

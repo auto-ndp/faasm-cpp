@@ -10,16 +10,22 @@ PIN_TOOL="${NDPCODE}/pin-NearMAP/obj-intel64/NearMAP.so"
 mkdir -p pintraces
 rm -f pintraces/*.log
 
-export FAASM_INPUT="$(pwd)/data/tiki-4m.txt"
-FUNC=wordcount
-echo "${FUNC}" && "${PIN_EXE}" -t "${PIN_TOOL}" -o "pintraces/${FUNC}.log" -- "./${FUNC}_emu" 2> "${FUNC}_pinlog.log" > "${FUNC}_funclog.log"
+for PAGESIZE in 16 64 256 1024 4096
+do
+    echo Page size: ${PAGESIZE}
 
-FUNC=sha256sum
-echo "${FUNC}" && "${PIN_EXE}" -t "${PIN_TOOL}" -o "pintraces/${FUNC}.log" -- "./${FUNC}_emu" 2> "${FUNC}_pinlog.log" > "${FUNC}_funclog.log"
+    export FAASM_INPUT="$(pwd)/data/tiki-4m.txt"
+    FUNC=wordcount
+    echo "${FUNC}" && "${PIN_EXE}" -t "${PIN_TOOL}" -p "${PAGESIZE}" -o "pintraces/${FUNC}_${PAGESIZE}.log" -- "./${FUNC}_emu" 2> "${FUNC}_${PAGESIZE}_pinlog.log" > "${FUNC}_${PAGESIZE}_funclog.log"
 
-export FAASM_INPUT="$(pwd)/data/tiki-4m.txt User"
-FUNC=grep
-echo "${FUNC}" && "${PIN_EXE}" -t "${PIN_TOOL}" -o "pintraces/${FUNC}.log" -- "./${FUNC}_emu" 2> "${FUNC}_pinlog.log" > "${FUNC}_funclog.log"
+    FUNC=sha256sum
+    echo "${FUNC}" && "${PIN_EXE}" -t "${PIN_TOOL}" -p "${PAGESIZE}" -o "pintraces/${FUNC}_${PAGESIZE}.log" -- "./${FUNC}_emu" 2> "${FUNC}_${PAGESIZE}_pinlog.log" > "${FUNC}_${PAGESIZE}_funclog.log"
+
+    export FAASM_INPUT="$(pwd)/data/tiki-4m.txt User"
+    FUNC=grep
+    echo "${FUNC}" && "${PIN_EXE}" -t "${PIN_TOOL}" -p "${PAGESIZE}" -o "pintraces/${FUNC}_${PAGESIZE}.log" -- "./${FUNC}_emu" 2> "${FUNC}_${PAGESIZE}_pinlog.log" > "${FUNC}_${PAGESIZE}_funclog.log"
+
+done
 
 echo Analysis
 ${ANALYSIS_EXE} pintraces
