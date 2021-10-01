@@ -10,6 +10,8 @@
 #include <stublib.h>
 #include <utility>
 #include <vector>
+#include <iostream>
+#include <cstdlib>
 
 namespace {
 std::vector<std::pair<uint8_t*, size_t>> mmaps;
@@ -28,7 +30,12 @@ uint8_t* __faasmndp_getMmap(const uint8_t* keyPtr,
                             uint32_t maxRequestedLen,
                             uint32_t* outDataLenPtr)
 {
-    FILE* fp = fopen((const char*)keyPtr, "rb");
+    std::string fpath(reinterpret_cast<const char*>(keyPtr), size_t(keyLen));
+    FILE* fp = fopen(fpath.c_str(), "rb");
+    if (fp == nullptr) {
+        std::cerr << "[PINfaasmEMU] Couldn't open file " << fpath;
+        std::terminate();
+    }
     size_t size = 0;
     fseek(fp, 0, SEEK_END);
     size = ftell(fp);
