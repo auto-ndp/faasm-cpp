@@ -24,6 +24,8 @@ do
     export FAASM_INPUT="$(pwd)/data/tiki-4m.txt User"
     FUNC=grep
     echo "${FUNC}" && "${PIN_EXE}" -t "${PIN_TOOL}" -p "${PAGESIZE}" -o "pintraces/${FUNC}_${PAGESIZE}.log" -- "./${FUNC}_emu" 2> "${FUNC}_${PAGESIZE}_pinlog.log" > "${FUNC}_${PAGESIZE}_funclog.log"
+    FUNC=substr
+    echo "${FUNC}" && "${PIN_EXE}" -t "${PIN_TOOL}" -p "${PAGESIZE}" -o "pintraces/${FUNC}_${PAGESIZE}.log" -- "./${FUNC}_emu" 2> "${FUNC}_${PAGESIZE}_pinlog.log" > "${FUNC}_${PAGESIZE}_funclog.log"
 
 done
 
