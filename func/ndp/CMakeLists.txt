@@ -19,6 +19,7 @@ ndp_func(put_simple put_simple.cpp)
 ndp_func(thumbnailer thumbnailer.cpp)
 ndp_func(wordcount wordcount.cpp)
 ndp_func(grep grep.cpp)
+ndp_func(substr substr.cpp)
 ndp_func(sha256sum sha256sum.cpp)
 ndp_func(json_parse json_parse.cpp)
 
