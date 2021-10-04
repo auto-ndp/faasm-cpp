@@ -58,6 +58,7 @@ int __faasmndp_storageCallAndAwait(FaasmNdpFuncPtr funcPtr)
     pinnearmap_phase("ignore-mmaps-clear");
     for (auto [ptr, size] : mmaps) {
         memset(ptr, 0, size);
+        free(ptr);
     }
     mmaps.clear();
     pinnearmap_phase("post-offloaded");
