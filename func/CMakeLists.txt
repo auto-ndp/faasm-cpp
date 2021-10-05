@@ -85,6 +85,13 @@ else ()
 
 endif ()
 
+add_library(Eigen34 INTERFACE)
+target_compile_features(Eigen34 INTERFACE cxx_std_17)
+target_include_directories(Eigen34 INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../third-party/eigen-3.4)
+target_compile_definitions(Eigen34 INTERFACE EIGEN_INITIALIZE_MATRICES_BY_ZERO=1
+    EIGEN_NO_AUTOMATIC_RESIZING=1 EIGEN_NO_IO=1 EIGEN_DONT_PARALLELIZE=1 EIGEN_NO_CUDA=1)
+add_library(Eigen34::Eigen ALIAS Eigen34)
+
 add_subdirectory(errors)
 add_subdirectory(lbm)
 add_subdirectory(darknet)
