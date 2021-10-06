@@ -20,6 +20,8 @@
 #ifndef EIGEN_MEMORY_H
 #define EIGEN_MEMORY_H
 
+#include "memory.h"
+
 #ifndef EIGEN_MALLOC_ALREADY_ALIGNED
 
 // Try to determine automatically if malloc is already aligned.
@@ -361,6 +363,7 @@ template<typename T, bool Align> EIGEN_DEVICE_FUNC inline T* conditional_aligned
 template<typename T> EIGEN_DEVICE_FUNC inline void aligned_delete(T *ptr, std::size_t size)
 {
   destruct_elements_of_array<T>(ptr, size);
+  memset(ptr, 0, size * sizeof(T));
   Eigen::internal::aligned_free(ptr);
 }
 
@@ -370,6 +373,7 @@ template<typename T> EIGEN_DEVICE_FUNC inline void aligned_delete(T *ptr, std::s
 template<typename T, bool Align> EIGEN_DEVICE_FUNC inline void conditional_aligned_delete(T *ptr, std::size_t size)
 {
   destruct_elements_of_array<T>(ptr, size);
+  memset(ptr, 0, size * sizeof(T));
   conditional_aligned_free<Align>(ptr);
 }
 
@@ -423,6 +427,8 @@ template<typename T, bool Align> inline T* conditional_aligned_realloc_new_auto(
   check_size_for_overflow<T>(old_size);
   if(NumTraits<T>::RequireInitialization && (new_size < old_size))
     destruct_elements_of_array(pts+new_size, old_size-new_size);
+  if (new_size < old_size)
+    memset(pts + new_size, 0, (old_size-new_size) * sizeof(T));
   T *result = reinterpret_cast<T*>(conditional_aligned_realloc<Align>(reinterpret_cast<void*>(pts), sizeof(T)*new_size, sizeof(T)*old_size));
   if(NumTraits<T>::RequireInitialization && (new_size > old_size))
   {
@@ -443,6 +449,7 @@ template<typename T, bool Align> EIGEN_DEVICE_FUNC inline void conditional_align
 {
   if(NumTraits<T>::RequireInitialization)
     destruct_elements_of_array<T>(ptr, size);
+  memset(ptr, 0, size * sizeof(T));
   conditional_aligned_free<Align>(ptr);
 }
 
