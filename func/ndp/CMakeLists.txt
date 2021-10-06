@@ -23,6 +23,7 @@ ndp_func(grep grep.cpp)
 ndp_func(substr substr.cpp)
 ndp_func(sha256sum sha256sum.cpp)
 ndp_func(json_parse json_parse.cpp)
+ndp_func(pcakmm pcakmm.cpp)
 
 # 23/09/2020 - removing simd
 # WASM-only functions

@@ -10,7 +10,7 @@ do
     OUTF=${PROG/.cpp/_emu}
     if [[ "${PROG}" -nt "${OUTF}" ]]; then
         echo "Compiling ${PROG} -> ${OUTF}"
-        ${EMUCLANGPP} "${PROG}" "$HOME/phd/code/pin-NearMAP/stublib/stublib.a" -o "${OUTF}"
+        ${EMUCLANGPP} "${PROG}" "$HOME/phd/code/pin-NearMAP/stublib/stublib.a" -o "${OUTF}" || exit 1
     else
         echo "Skipping ${PROG} - no changes"
     fi
