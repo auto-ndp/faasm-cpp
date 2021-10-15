@@ -91,3 +91,11 @@ void faasmSetOutput(const uint8_t* newOutput, long outputLen)
 {
     fwrite(newOutput, 1, outputLen, stdout);
 }
+
+#undef main
+int faasm_main(int argc, char** argv);
+int main(int argc, char** argv)
+{
+    pinnearmap_phase("main");
+    return faasm_main(argc, argv);
+}
