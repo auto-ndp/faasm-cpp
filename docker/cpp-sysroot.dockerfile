@@ -1,6 +1,6 @@
 FROM kubasz51/faasm-llvm:10.0.1 as llvm
 
-FROM kubasz51/faasm-faabric-base:0.1.2
+FROM kubasz51/faasm-faabric-base:0.1.5
 ARG SYSROOT_VERSION
 
 # Copy the toolchain in from the LLVM container
@@ -10,7 +10,7 @@ RUN apt update
 RUN apt install -y \
     autoconf \
     autotools-dev \
-    clang-tidy-10 \
+    clang-tidy-13 \
     libtool \
     python3-dev \
     python3-venv \
@@ -32,6 +32,9 @@ RUN git submodule update --init -f third-party/wasi-libc
 RUN git submodule update --init -f third-party/FFmpeg
 
 # Install the faasmtools Python lib
+RUN pip3 install -U pip
+RUN pip3 install -U setuptools
+RUN pip3 install -U wheel
 RUN pip3 install -r requirements.txt
 RUN pip3 install .
 
