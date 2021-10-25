@@ -1,6 +1,6 @@
 FROM kubasz51/faasm-llvm:10.0.1 as llvm
 
-FROM kubasz51/faasm-faabric-base:0.1.5
+FROM kubasz51/faasm-faabric-base:0.1.6
 ARG SYSROOT_VERSION
 
 # Copy the toolchain in from the LLVM container
