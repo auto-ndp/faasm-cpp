@@ -13,7 +13,7 @@ def build_container(
         no_cache_str = ""
 
     build_cmd = [
-        "docker buildx build --platform linux/amd64,linux/arm64",
+        "docker buildx build --load --platform linux/amd64,linux/arm64",
         "--push" if push else "",
         no_cache_str,
         "-t {}".format(tag_name),
