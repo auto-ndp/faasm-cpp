@@ -13,7 +13,8 @@ def build_container(
         no_cache_str = ""
 
     build_cmd = [
-        "docker build",
+        "docker buildx build --platform linux/amd64,linux/arm64",
+        "--push" if push else "",
         no_cache_str,
         "-t {}".format(tag_name),
         "-f {}".format(dockerfile),
@@ -34,9 +35,6 @@ def build_container(
         env={"DOCKER_BUILDKIT": "1"},
         cwd=cwd,
     )
-
-    if push:
-        push_container(tag_name)
 
 
 def push_container(tag_name):
