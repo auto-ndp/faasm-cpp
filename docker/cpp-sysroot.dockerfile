@@ -1,35 +1,29 @@
 FROM kubasz51/faasm-llvm:10.0.1 as llvm
 
-FROM kubasz51/faasm-faabric-base:0.1.6
+FROM kubasz51/faasm-faabric-base:0.3.1
 ARG SYSROOT_VERSION
 
 # Copy the toolchain in from the LLVM container
 COPY --from=llvm /usr/local/faasm /usr/local/faasm
 
-RUN apt update
-RUN apt install -y \
-    autoconf \
-    autotools-dev \
-    clang-tidy-13 \
-    libtool \
-    python3-dev \
-    python3-venv \
-    gdb \
-    zsh \
-    python3-pip
+RUN apt-get update \
+    && apt-get upgrade --yes --no-install-recommends \
+    && apt-get install --yes --no-install-recommends autotools-dev \
+    && apt-get clean autoclean \
+    && apt-get autoremove
 
 # Get the code
 WORKDIR /code
-RUN git clone -b v${SYSROOT_VERSION} https://github.com/auto-ndp/faasm-cpp cpp
+RUN git clone --depth 1 -b v${SYSROOT_VERSION} https://github.com/auto-ndp/faasm-cpp cpp
 WORKDIR /code/cpp
 
 # Update submodules (not LLVM)
-RUN git submodule update --init -f third-party/eigen
-RUN git submodule update --init -f third-party/faabric
-RUN git submodule update --init -f third-party/faasm-clapack
-RUN git submodule update --init -f third-party/libffi
-RUN git submodule update --init -f third-party/wasi-libc
-RUN git submodule update --init -f third-party/FFmpeg
+RUN git submodule update --init --depth 1 -f third-party/eigen
+RUN git submodule update --init --depth 1 -f third-party/faabric
+RUN git submodule update --init --depth 1 -f third-party/faasm-clapack
+RUN git submodule update --init --depth 1 -f third-party/libffi
+RUN git submodule update --init --depth 1 -f third-party/wasi-libc
+RUN git submodule update --init --depth 1 -f third-party/FFmpeg
 
 # Install the faasmtools Python lib
 RUN pip3 install -U pip
