@@ -1,8 +1,5 @@
-#include <faasm/faasm.h>
 #include <omp.h>
 #include <stdio.h>
-
-bool failed = false;
 
 /**
  * Note - this function is designed to test basic OpenMP functionality.
@@ -11,6 +8,8 @@ bool failed = false;
 
 int main(int argc, char* argv[])
 {
+    bool failed = false;
+
     int nThreads = omp_get_max_threads();
     if (nThreads < 2) {
         printf("Need 2 or more threads but got %i\n", nThreads);
@@ -25,7 +24,6 @@ int main(int argc, char* argv[])
 
     bool* flags = new bool[nThreads];
 
-// Note the shared variables here are both local and global
 #pragma omp parallel default(none) shared(flags, failed, nThreads)
     {
         int thisThreadNum = omp_get_thread_num();

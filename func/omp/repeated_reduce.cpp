@@ -1,12 +1,9 @@
+#include <faasm/shared_mem.h>
+
 #include <cstdio>
 #include <math.h>
 #include <omp.h>
 #include <unistd.h>
-
-bool approxCompare(float a, float b)
-{
-    return truncf(1000.0f * a) == truncf(1000.0f * b);
-}
 
 bool doReduce()
 {
@@ -16,9 +13,12 @@ bool doReduce()
     int counts[] = { 0, 0, 0, 0, 0 };
 
     int reducedA = 0;
-    double reducedB = 0;
+    int reducedB = 0;
 
     bool success = true;
+
+    FAASM_REDUCE(reducedA, FAASM_TYPE_INT, FAASM_OP_SUM)
+    FAASM_REDUCE(reducedB, FAASM_TYPE_INT, FAASM_OP_SUM)
 
 #pragma omp parallel for num_threads(nThreads) default(none) \
     shared(counts,loopSize,success) \
@@ -30,7 +30,7 @@ bool doReduce()
 
         // Add one here so that thread zero still has an effect
         reducedA += 10 * (threadNum + 1);
-        reducedB += 15 * ((threadNum + 1) / 4.2);
+        reducedB += 15 * (threadNum + 1);
 
         int expectedReduceA = thisCount * 10 * (threadNum + 1);
         if (reducedA != expectedReduceA) {
@@ -59,17 +59,16 @@ bool doReduce()
         }
     }
 
-    // Note - to get these values you can just compile and run natively
     int expectedFinalReducedA = 3000;
-    double expectedFinalReducedB = 1071.428571;
+    int expectedFinalReducedB = 4500;
 
     if (reducedA != expectedFinalReducedA) {
         printf("reducedA %i != %i\n", reducedA, expectedFinalReducedA);
         return false;
     }
 
-    if (!approxCompare(reducedB, expectedFinalReducedB)) {
-        printf("reducedB %f != %f (approx)\n", reducedB, expectedFinalReducedB);
+    if (reducedB != expectedFinalReducedB) {
+        printf("reducedB %i != %i\n", reducedB, expectedFinalReducedB);
         return false;
     }
 
@@ -79,7 +78,7 @@ bool doReduce()
 int main(int argc, char* argv[])
 {
     // Run reduce in a loop and check each iteration is correct
-    int nLoops = 10000;
+    int nLoops = 10;
     for (int i = 0; i < nLoops; i++) {
         bool success = doReduce();
         if (!success) {
