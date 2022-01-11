@@ -363,7 +363,7 @@ template<typename T, bool Align> EIGEN_DEVICE_FUNC inline T* conditional_aligned
 template<typename T> EIGEN_DEVICE_FUNC inline void aligned_delete(T *ptr, std::size_t size)
 {
   destruct_elements_of_array<T>(ptr, size);
-  memset(ptr, 0, size * sizeof(T));
+  if(ptr != nullptr) {memset(ptr, 0, size * sizeof(T));}
   Eigen::internal::aligned_free(ptr);
 }
 
@@ -449,7 +449,7 @@ template<typename T, bool Align> EIGEN_DEVICE_FUNC inline void conditional_align
 {
   if(NumTraits<T>::RequireInitialization)
     destruct_elements_of_array<T>(ptr, size);
-  memset(ptr, 0, size * sizeof(T));
+  if(ptr != nullptr) {memset(ptr, 0, size * sizeof(T));}
   conditional_aligned_free<Align>(ptr);
 }
 
