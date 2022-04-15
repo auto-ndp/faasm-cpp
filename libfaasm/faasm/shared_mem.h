@@ -14,7 +14,7 @@ extern "C"
 
 // NOTE - these types must correspond to the enums defined in the Faabric
 // codebase, stored here at time of writing:
-// https://github.com/faasm/faabric/blob/master/include/faabric/util/snapshot.h
+// https://github.com/faasm/faabric/blob/main/include/faabric/util/snapshot.h
 #define FAASM_TYPE_RAW 0
 #define FAASM_TYPE_BOOL 1
 #define FAASM_TYPE_INT 2
@@ -29,7 +29,11 @@ extern "C"
 #define FAASM_OP_MAX 4
 #define FAASM_OP_MIN 5
 
-#define FAASM_REDUCE(var, type, op) __faasm_sm_reduce((void*)&(var), type, op);
+#define FAASM_REDUCE(var, type, op)                                            \
+    __faasm_sm_reduce((void*)&(var), type, op, 0);
+
+#define FAASM_REDUCE_INNER(var, type, op)                                      \
+    __faasm_sm_reduce((void*)&(var), type, op, 1);
 
 #define FAASM_START_CRITICAL_LOCAL() __faasm_sm_critical_local();
 
@@ -42,12 +46,14 @@ extern "C"
     }                                                                          \
     __faasm_sm_critical_local_end();
 
+// It appears OpenMP just ignores the atomic pragma, so we have to replace with
+// our own custom stuff
 #define FAASM_ATOMIC_INCR(var)                                                 \
-    FAASM_REDUCE(var, FAASM_TYPE_INT, FAASM_OP_SUM)                            \
+    __faasm_sm_reduce((void*)&(var), FAASM_TYPE_INT, FAASM_OP_SUM, 1);         \
     FAASM_CRITICAL_LOCAL(var++)
 
 #define FAASM_ATOMIC_INCR_BY(var, value)                                       \
-    FAASM_REDUCE(var, FAASM_TYPE_INT, FAASM_OP_SUM)                            \
+    __faasm_sm_reduce((void*)&(var), FAASM_TYPE_INT, FAASM_OP_SUM, 1);         \
     FAASM_CRITICAL_LOCAL(var += value)
 
 #ifdef __cplusplus

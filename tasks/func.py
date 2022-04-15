@@ -1,19 +1,23 @@
-from os import listdir
-from os.path import join, splitext
-
+from os import makedirs, listdir
+from os.path import join, exists, splitext
+from shutil import rmtree
+from subprocess import run
+import requests
 from invoke import task
 
-import requests
-
 from faasmtools.env import PROJ_ROOT
+from faasmtools.endpoints import (
+    get_faasm_invoke_host_port,
+    get_faasm_upload_host_port,
+    get_knative_headers,
+)
 from faasmtools.compile_util import wasm_cmake, wasm_copy_upload
 
 FAABRIC_MSG_TYPE_FLUSH = 3
 
 FUNC_DIR = join(PROJ_ROOT, "func")
 FUNC_BUILD_DIR = join(PROJ_ROOT, "build", "func")
-
-KNATIVE_HEADERS = {"Host": "faasm-worker.faasm.example.com"}
+NATIVE_FUNC_BUILD_DIR = join(PROJ_ROOT, "build", "native-func")
 
 
 def _get_all_user_funcs(user):
@@ -36,22 +40,47 @@ def _copy_built_function(user, func):
 
 
 @task(default=True, name="compile")
-def compile(ctx, user, func, clean=False, debug=False):
+def compile(ctx, user, func, clean=False, debug=False, native=False):
     """
     Compile a function
     """
-    # Build the function (gets written to the build dir)
-    wasm_cmake(FUNC_DIR, FUNC_BUILD_DIR, func, clean, debug)
+    if native:
+        if exists(NATIVE_FUNC_BUILD_DIR) and clean:
+            rmtree(NATIVE_FUNC_BUILD_DIR)
 
-    # Copy into place
-    _copy_built_function(user, func)
+        makedirs(NATIVE_FUNC_BUILD_DIR, exist_ok=True)
+
+        build_cmd = ["cmake", "-GNinja", FUNC_DIR]
+
+        build_cmd = " ".join(build_cmd)
+        print(build_cmd)
+        run(
+            "cmake -GNinja {}".format(FUNC_DIR),
+            check=True,
+            shell=True,
+            cwd=NATIVE_FUNC_BUILD_DIR,
+        )
+
+        run(
+            "ninja {}".format(func),
+            shell=True,
+            check=True,
+            cwd=NATIVE_FUNC_BUILD_DIR,
+        )
+    else:
+        # Build the function (gets written to the build dir)
+        wasm_cmake(FUNC_DIR, FUNC_BUILD_DIR, func, clean, debug)
+
+        # Copy into place
+        _copy_built_function(user, func)
 
 
-@task()
-def upload(ctx, user, func, host="upload", port=8002):
+@task
+def upload(ctx, user, func):
     """
     Upload a compiled function
     """
+    host, port = get_faasm_upload_host_port()
     func_file = join(FUNC_BUILD_DIR, user, "{}.wasm".format(func))
     url = "http://{}:{}/f/{}/{}".format(host, port, user, func)
     response = requests.put(url, data=open(func_file, "rb"))
@@ -59,21 +88,22 @@ def upload(ctx, user, func, host="upload", port=8002):
     print("Response {}: {}".format(response.status_code, response.text))
 
 
-@task()
-def upload_user(ctx, user, host="upload", port=8002):
+@task
+def upload_user(ctx, user):
     """
     Upload all compiled functions for a user
     """
     funcs = _get_all_user_funcs(user)
     for f in funcs:
-        upload(ctx, user, f, host=host, port=port)
+        upload(ctx, user, f)
 
 
-@task()
-def invoke(ctx, user, func, input_data=None, host="worker", port=8080):
+@task
+def invoke(ctx, user, func, input_data=None, mpi=None, graph=False):
     """
     Invoke a given function
     """
+    host, port = get_faasm_invoke_host_port()
     url = "http://{}:{}".format(host, port)
     data = {
         "function": func,
@@ -83,7 +113,15 @@ def invoke(ctx, user, func, input_data=None, host="worker", port=8080):
     if input_data:
         data["input_data"] = input_data
 
-    response = requests.post(url, json=data, headers=KNATIVE_HEADERS)
+    if mpi is not None:
+        data["mpi_world_size"] = int(mpi)
+
+    if graph:
+        data["record_exec_graph"] = True
+        data["async"] = True
+
+    headers = get_knative_headers()
+    response = requests.post(url, json=data, headers=headers)
 
     if response.status_code != 200:
         print("Error ({}):\n{}".format(response.status_code, response.text))
@@ -92,13 +130,31 @@ def invoke(ctx, user, func, input_data=None, host="worker", port=8080):
     print("Success:\n{}".format(response.text))
 
 
-@task()
-def flush(ctx, host="worker", port=8080):
+@task
+def update(ctx, user, func, clean=False, debug=False, native=False):
+    """
+    Combined compile, upload, flush
+    """
+    compile(ctx, user, func, clean=clean)
+
+    upload(ctx, user, func)
+
+    flush(ctx)
+
+
+@task
+def flush(ctx):
+    """
+    Flush the Faasm cluster
+    """
+    headers = get_knative_headers()
+    host, port = get_faasm_invoke_host_port()
+
     url = "http://{}:{}".format(host, port)
     data = {"type": FAABRIC_MSG_TYPE_FLUSH}
-    response = requests.post(url, json=data)
+    response = requests.post(url, json=data, headers=headers)
 
-    print("Response {}: {}".format(response.status_code, response.text))
+    print("Flush response {}: {}".format(response.status_code, response.text))
 
 
 @task

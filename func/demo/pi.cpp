@@ -1,4 +1,3 @@
-#include <faasm/counter.h>
 #include <faasm/faasm.h>
 #include <faasm/input.h>
 #include <faasm/random.h>
@@ -7,20 +6,13 @@
 #include <string>
 #include <vector>
 
-#define N_GUESSES 1000000
-#define COUNT_KEY "count"
+#define CHUNK_SIZE 100000
+#define PI 3.14159
 
 int piStep()
 {
-    const char* inputStr = faasm::getStringInput("0");
-    int chunkSize = std::stoi(inputStr);
-    if (chunkSize == 0) {
-        printf("Didn't get told a chunk size\n");
-        return 1;
-    }
-
     int count = 0;
-    for (int i = 0; i < chunkSize; i++) {
+    for (int i = 0; i < CHUNK_SIZE; i++) {
         // Two random points
         double x = faasm::randomFloat();
         double y = faasm::randomFloat();
@@ -31,8 +23,8 @@ int piStep()
         }
     }
 
-    faasm::incrementCounter(COUNT_KEY, count, false);
-
+    // Append count for this worker
+    faasmAppendState("pi", BYTES(&count), sizeof(int));
     return 0;
 }
 
@@ -41,34 +33,33 @@ int piStep()
  */
 int main(int argc, char* argv[])
 {
-    const char* inputStr = faasm::getStringInput("4");
-    int nWorkers = std::stoi(inputStr);
+    std::string inputData = faasm::getStringInput("4");
+    int nWorkers = std::stoi(inputData);
+    int nTotal = CHUNK_SIZE * nWorkers;
 
-    // Write chunk size to state
-    int chunkSize = N_GUESSES / nWorkers;
+    // Dispatch chained calls
+    faasmChainBatch(piStep, "", nWorkers);
 
-    // Set count to zero
-    faasm::initCounter(COUNT_KEY);
+    // Read in the counts
+    size_t buffSize = nWorkers * sizeof(int);
+    auto buffer = new int[nWorkers];
+    faasmReadAppendedState("pi", (uint8_t*)buffer, buffSize, nWorkers);
 
-    // Dispatch chained calls in a loop
-    std::vector<unsigned int> callIds;
-    for (int i = 0; i < nWorkers; i++) {
-        auto inputData = BYTES(&chunkSize);
-        unsigned int callId = faasmChain(piStep, inputData, sizeof(int));
-        callIds.push_back(callId);
+    // Sum the counts
+    int finalCount = 0;
+    for (int w = 0; w < nWorkers; w++) {
+        finalCount += buffer[w];
     }
 
-    // Wait for calls to finish
-    for (unsigned int callId : callIds) {
-        faasmAwaitCall(callId);
-    }
+    // Estimate pi
+    float pi = 4 * ((float)finalCount / (nTotal));
+    float error = abs(PI - pi);
 
-    int finalCount = faasm::getCounter(COUNT_KEY);
-    float piEstimate = 4 * ((float)finalCount / (N_GUESSES));
-
-    std::string output = "Pi estimate: " + std::to_string(piEstimate) + "\n";
+    std::string output = "Pi estimate: " + std::to_string(pi) + "(error " +
+                         std::to_string(error) + ")\n";
     printf("%s", output.c_str());
     faasm::setStringOutput(output.c_str());
 
+    delete[] buffer;
     return 0;
 }

@@ -4,9 +4,12 @@
 #ifdef __wasm__
 #define HOST_IFACE_FUNC
 #else
-//#define HOST_IFACE_FUNC __attribute__((weak))
-#define HOST_IFACE_FUNC
+// Avoid need to define any of these functions when compiling natively
+#define HOST_IFACE_FUNC __attribute__((weak))
 #endif
+
+// Migration entry point
+typedef void (*FaasmMigrateEntryPoint)(int);
 
 HOST_IFACE_FUNC
 long __faasm_read_state(const char* key, unsigned char* buffer, long bufferLen);
@@ -79,12 +82,6 @@ HOST_IFACE_FUNC
 void __faasm_pull_state(const char* key, long stateLen);
 
 HOST_IFACE_FUNC
-void __faasm_lock_state_global(const char* key);
-
-HOST_IFACE_FUNC
-void __faasm_unlock_state_global(const char* key);
-
-HOST_IFACE_FUNC
 void __faasm_lock_state_read(const char* key);
 
 HOST_IFACE_FUNC
@@ -147,7 +144,7 @@ HOST_IFACE_FUNC
 void __faasm_sm_raw(void* var, int varSize);
 
 HOST_IFACE_FUNC
-void __faasm_sm_reduce(void* var, int varType, int reduceOp);
+void __faasm_sm_reduce(void* var, int varType, int reduceOp, int currentBatch);
 
 HOST_IFACE_FUNC
 void __faasm_sm_var(void* var, int varType);
@@ -158,4 +155,6 @@ void __faasm_sm_critical_local();
 HOST_IFACE_FUNC
 void __faasm_sm_critical_local_end();
 
+HOST_IFACE_FUNC
+void __faasm_migrate_point(FaasmMigrateEntryPoint f, int arg);
 #endif
