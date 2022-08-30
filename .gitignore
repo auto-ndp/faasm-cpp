@@ -3,6 +3,7 @@ build-native/
 build-native-shared/
 compile_commands.json
 .clangd/
+venv-bm/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,6 +1,7 @@
 .git
 
 build/
+venv-bm/
 
 # Ignore big third party deps
 third-party/llvm-project/
