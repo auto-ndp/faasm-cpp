@@ -9,8 +9,8 @@ COPY --from=llvm /usr/local/faasm /usr/local/faasm
 RUN apt-get update \
     && apt-get upgrade --yes --no-install-recommends \
     && apt-get install --yes --no-install-recommends autotools-dev libltdl-dev \
-    && apt-get clean autoclean \
-    && apt-get autoremove
+    && apt-get clean autoclean --yes \
+    && apt-get autoremove --yes
 
 # Get the code
 WORKDIR /code
