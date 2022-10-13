@@ -13,9 +13,9 @@ from faasmtools.env import (
     LLVM_VERSION,
 )
 
-LLVM_IMAGE_NAME = "faasm/llvm"
+LLVM_IMAGE_NAME = "kubasz51/faasm-llvm"
 LLVM_DOCKERFILE = join(PROJ_ROOT, "docker", "llvm.dockerfile")
-SYSROOT_IMAGE_NAME = "faasm/cpp-sysroot"
+SYSROOT_IMAGE_NAME = "kubasz51/faasm-cpp-sysroot"
 SYSROOT_DOCKERFILE = join(PROJ_ROOT, "docker", "cpp-sysroot.dockerfile")
 
 
