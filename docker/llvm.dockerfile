@@ -1,18 +1,14 @@
 FROM kubasz51/faasm-faabric-base:0.1.6
 
-# Copy the code in
-WORKDIR /code
-COPY . .
-
-# Run the main make
-RUN make
-
-# Print the clang version
-RUN /usr/local/faasm/toolchain/bin/clang --version
-
-# Remove the code
-WORKDIR /
-RUN rm -r /code
-
-CMD /bin/bash
-
+# Get the code, build the main targets, and remove the code
+ARG SYSROOT_VERSION
+RUN mkdir -p /code \
+    && git clone -b v${SYSROOT_VERSION} --depth 1 \
+        https://github.com/auto-ndp/faasm-cpp \
+        /code/cpp \
+    && cd /code/cpp \
+    && git submodule update --init --depth 1 -f third-party/llvm-project \
+    && git submodule update --init --depth 1 -f third-party/wasi-libc \
+    && make \
+    && /usr/local/faasm/toolchain/bin/clang --version \
+    && rm -rf /code

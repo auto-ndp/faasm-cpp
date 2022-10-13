@@ -16,7 +16,7 @@ if [[ -z "$CPP_DOCKER" ]]; then
 else
     # Running inside the container, we know the project root
     PROJ_ROOT="/code/cpp"
-    VENV_PATH="${PROJ_ROOT}/venv"
+    VENV_PATH="/code/cpp/venv"
 
     # Use containerised redis
     alias redis-cli="redis-cli -h redis"
@@ -31,14 +31,7 @@ pushd ${PROJ_ROOT}>>/dev/null
 # ----------------------------
 
 if [ ! -d ${VENV_PATH} ]; then
-    python3 -m venv ${VENV_PATH}
-    (
-        source ${VENV_PATH}/bin/activate
-        pip install -U pip
-        pip install -U setuptools
-        pip install -U wheel
-        pip install -r requirements.txt
-    )
+    ./bin/create_venv.sh
 fi
 
 export VIRTUAL_ENV_DISABLE_PROMPT=1
