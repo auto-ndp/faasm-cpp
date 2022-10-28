@@ -106,6 +106,7 @@ add_subdirectory(mpi)
 add_subdirectory(ndp)
 add_subdirectory(omp)
 add_subdirectory(povray)
+add_subdirectory(tf)
 
 if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/nab")
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/nab)
