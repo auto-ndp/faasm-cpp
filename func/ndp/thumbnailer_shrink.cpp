@@ -34,11 +34,8 @@ std::vector<uint8_t> newData;
 int worker()
 {
     uint32_t fetchedLength{};
-    uint8_t* objData =
-      __faasmndp_getMmap(reinterpret_cast<const uint8_t*>(objKey.data()),
-                         objKey.size(),
-                         1 * 1024 * 1024 * 1024,
-                         &fetchedLength);
+    uint8_t* objData = __faasmndp_getMmap(
+      objKey.data(), objKey.size(), 0, 1 * 1024 * 1024 * 1024, &fetchedLength);
 
     if (objData == nullptr || fetchedLength < 4) {
         const string_view output{
@@ -106,7 +103,7 @@ int main(int argc, char* argv[])
     objKey =
       string_view(reinterpret_cast<char*>(inputKey.data()), inputKey.size());
 
-    __faasmndp_storageCallAndAwait(worker);
+    __faasmndp_storageCallAndAwait(objKey.data(), objKey.size(), worker);
 
     int outPngLen{ 0 };
     uint8_t* outPng = stbi_write_png_to_mem(

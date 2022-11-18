@@ -2,13 +2,13 @@
 #error Trying to compile PIN-compatible emulation in faasm mode
 #endif
 #include <algorithm>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <faasm/faasm.h>
-#include <iostream>
 #include <ndpapi.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#include <string>
 #include <stublib.h>
 #include <utility>
 #include <vector>
@@ -17,7 +17,7 @@ namespace {
 std::vector<std::pair<uint8_t*, size_t>> mmaps;
 }
 
-int32_t __faasmndp_put(const uint8_t* keyPtr,
+int32_t __faasmndp_put(const char* keyPtr,
                        uint32_t keyLen,
                        const uint8_t* dataPtr,
                        uint32_t dataLen)
@@ -25,33 +25,40 @@ int32_t __faasmndp_put(const uint8_t* keyPtr,
     return 0;
 }
 
-uint8_t* __faasmndp_getMmap(const uint8_t* keyPtr,
-                            uint32_t keyLen,
-                            uint32_t maxRequestedLen,
+uint8_t* __faasmndp_getMmap(const char* keyPtr,
+                            int32_t keyLen,
+                            int64_t offset,
+                            int64_t maxRequestedLen,
                             uint32_t* outDataLenPtr)
 {
     pinnearmap_phase("ignore-fread");
-    std::string fpath(reinterpret_cast<const char*>(keyPtr), size_t(keyLen));
+    std::string fpath(keyPtr, size_t(keyLen));
     FILE* fp = fopen(fpath.c_str(), "rb");
     if (fp == nullptr) {
-        std::cerr << "[PINfaasmEMU] Couldn't open file " << fpath;
+        fprintf(stderr, "[PINfaasmEMU] Couldn't open file %s", fpath.c_str());
         std::terminate();
     }
     size_t size = 0;
     fseek(fp, 0, SEEK_END);
     size = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
-    uint8_t* data = (uint8_t*)calloc(size + 32, 1);
-    size = fread(data, 1, size, fp);
+    if (size > offset) {
+        offset = size;
+    }
+    fseek(fp, offset, SEEK_SET);
+    uint8_t* data = (uint8_t*)calloc(size + 32 - offset, 1);
+    size = fread(data, 1, size - offset, fp);
     fclose(fp);
-    *outDataLenPtr = std::min(maxRequestedLen, (uint32_t)size);
+    *outDataLenPtr =
+      std::min(uint32_t(maxRequestedLen), (uint32_t)(size - offset));
     mmaps.push_back(std::make_pair(data, size));
     pinnearmap_phase("after-fread");
     pinnearmap_io_bytes(size);
     return data;
 }
 
-int __faasmndp_storageCallAndAwait(FaasmNdpFuncPtr funcPtr)
+int __faasmndp_storageCallAndAwait(const char* keyPtr,
+                                   uint32_t keyLen,
+                                   FaasmNdpFuncPtr funcPtr)
 {
     pinnearmap_phase("offloaded");
     int val = funcPtr();
@@ -63,6 +70,22 @@ int __faasmndp_storageCallAndAwait(FaasmNdpFuncPtr funcPtr)
     mmaps.clear();
     pinnearmap_phase("post-offloaded");
     return val;
+}
+
+int __faasmndp_storageCallAndAwait1(const char* keyPtr,
+                                    uint32_t keyLen,
+                                    FaasmNdpFuncPtr funcPtr,
+                                    int32_t arg1)
+{
+    return __faasmndp_storageCallAndAwait(keyPtr, keyLen, funcPtr);
+}
+int __faasmndp_storageCallAndAwait2(const char* keyPtr,
+                                    uint32_t keyLen,
+                                    FaasmNdpFuncPtr funcPtr,
+                                    int32_t arg1,
+                                    int32_t arg2)
+{
+    return __faasmndp_storageCallAndAwait(keyPtr, keyLen, funcPtr);
 }
 
 const char* FAASM_INPUT_ENV = "FAASM_INPUT";

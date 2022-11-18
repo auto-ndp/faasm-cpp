@@ -28,11 +28,8 @@ Eigen::MatrixXf pcaReducedData;
 int work()
 {
     uint32_t fetchedLength{};
-    uint8_t* objData =
-      __faasmndp_getMmap(reinterpret_cast<const uint8_t*>(objKey.data()),
-                         objKey.size(),
-                         1 * 1024 * 1024 * 1024,
-                         &fetchedLength);
+    uint8_t* objData = __faasmndp_getMmap(
+      objKey.data(), objKey.size(), 0, 1 * 1024 * 1024 * 1024, &fetchedLength);
     if (objData == nullptr || fetchedLength < 64) {
         const string_view output{
             "FAILED - no object found with the given key"
@@ -113,7 +110,8 @@ int main(int argc, char* argv[])
     }
     objKey = inputStr;
 
-    if (__faasmndp_storageCallAndAwait(work) != 0) {
+    if (__faasmndp_storageCallAndAwait(objKey.data(), objKey.size(), work) !=
+        0) {
         return 1;
     }
 

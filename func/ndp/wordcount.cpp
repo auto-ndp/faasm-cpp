@@ -33,11 +33,8 @@ int ndp_worker()
     auto& wordCounts = workerComm.wordCounts;
     // worker code [extracted]
     uint32_t fetchedLength{};
-    uint8_t* objData =
-      __faasmndp_getMmap(reinterpret_cast<const uint8_t*>(objKey.data()),
-                         objKey.size(),
-                         1 * 1024 * 1024 * 1024,
-                         &fetchedLength);
+    uint8_t* objData = __faasmndp_getMmap(
+      objKey.data(), objKey.size(), 0, 1 * 1024 * 1024 * 1024, &fetchedLength);
     if (objData == nullptr) {
         printf("Error fetching object with key %.*s\n",
                static_cast<int>(objKey.size()),
@@ -70,7 +67,8 @@ int worker(const string_view objKey, std::vector<char>& outputBuf)
     // NDP call into storage
     workerComm = NdpWorkerComm();
     workerComm.objKey = objKey;
-    int ndpRetCode = __faasmndp_storageCallAndAwait(&ndp_worker);
+    int ndpRetCode =
+      __faasmndp_storageCallAndAwait(objKey.data(), objKey.size(), &ndp_worker);
     if (ndpRetCode != 0) {
         return ndpRetCode;
     }
@@ -107,9 +105,7 @@ int main(int argc, char* argv[])
     string_view inputStr(reinterpret_cast<char*>(inputBuf.data()),
                          inputBuf.size());
     if (inputStr.size() < 1) {
-        const string_view output{
-            "FAILED - no key. Usage: wordcount key1..."
-        };
+        const string_view output{ "FAILED - no key. Usage: wordcount key1..." };
         faasmSetOutput(reinterpret_cast<const uint8_t*>(output.data()),
                        output.size());
         return 1;
