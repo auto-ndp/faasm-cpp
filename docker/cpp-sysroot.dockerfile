@@ -1,6 +1,6 @@
 FROM kubasz51/faasm-llvm:10.0.1 as llvm
 
-FROM kubasz51/faasm-faabric-base:0.4.0
+FROM kubasz51/faasm-faabric-base:0.4.1
 ARG SYSROOT_VERSION
 SHELL ["/bin/bash", "-c"]
 ENV CPP_DOCKER="on"
