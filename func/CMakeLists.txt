@@ -78,14 +78,14 @@ target_compile_definitions(Eigen34 INTERFACE EIGEN_INITIALIZE_MATRICES_BY_ZERO=1
 add_library(Eigen34::Eigen ALIAS Eigen34)
 
 add_subdirectory(errors)
-add_subdirectory(lbm)
+# add_subdirectory(lbm)
 add_subdirectory(darknet)
 add_subdirectory(demo)
 add_subdirectory(dynlink)
 add_subdirectory(mpi)
 add_subdirectory(ndp)
 add_subdirectory(omp)
-add_subdirectory(povray)
+# add_subdirectory(povray)
 
 if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/nab")
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/nab)
