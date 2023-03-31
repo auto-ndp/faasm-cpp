@@ -14,6 +14,7 @@ using std::string_view;
 string_view objKey;
 string_view expression;
 std::vector<size_t> matches;
+int max_matches = 5;
 
 int work()
 {
@@ -36,7 +37,10 @@ int work()
          foundPos = objView.find(expression, startPos)) {
         matches.push_back(foundPos);
         startPos = foundPos + expression.size();
+        if (matches.size() >= max_matches)
+            break;
     }
+    uint32_t res = __faasmndp_unmap(objData, fetchedLength);
     return 0;
 }
 

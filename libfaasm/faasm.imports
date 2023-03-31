@@ -43,6 +43,7 @@ __faasm_sm_critical_local_end
 __faasm_migrate_point
 
 # FaasmNDP
+__faasmndp_unmap
 __faasmndp_getMmap
 __faasmndp_put
 __faasmndp_storageCallAndAwait

@@ -12,6 +12,9 @@ extern "C"
 
     typedef int (*FaasmNdpFuncPtr)();
 
+    int32_t __faasmndp_unmap(uint8_t* buffer,
+                             int32_t length);
+
     int32_t __faasmndp_put(const char* keyPtr,
                            uint32_t keyLen,
                            const uint8_t* dataPtr,
