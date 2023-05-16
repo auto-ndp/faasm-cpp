@@ -1,3 +1,9 @@
+/*
+ * Faaslet that reads as input an object (damon.data file format)
+ * and a hotness score threshold and computes the maximum size
+ * of the hot memory used by the target application.
+ */
+
 #include "faasm/faasm.h"
 #include "ndpapi.h"
 
@@ -8,21 +14,15 @@
 #include <string>
 #include <vector>
 
+struct record {
+  uint64_t timestamp; // microseconds
+  uint64_t memsize;
+};
+
 std::string objKey;
 int threshold = 0;
-std::vector<std::tuple<double, uint64_t>> accessedMemorySize;
-
-struct entry {
-  uint64_t start_addr;
-  uint64_t end_addr;
-  int accesses;
-};
-
-struct record {
-  uint32_t timestamp; // microseconds
-  int nr_regions;
-  std::vector<struct entry> entries;
-};
+std::vector<struct record> records;
+uint64_t maxmemsize = 0;
 
 int work() {
   uint32_t fetchedLength{};
@@ -42,7 +42,6 @@ int work() {
   std::istringstream objDataStream(objDataString);
   std::string line;
   std::vector<std::string> values;
-  std::vector<struct record> records;
 
   while (std::getline(objDataStream, line)) {
     std::istringstream iss(line);
@@ -51,10 +50,7 @@ int work() {
       values.push_back(value);
     }
 
-    uint32_t ts = (uint32_t)(std::stod(values.at(3)) * 1e6);
-
-    std::string nregstoken = values.at(6);
-    int nregs = std::stoi(nregstoken.substr(nregstoken.find("=") + 1));
+    uint64_t ts = (uint64_t)(std::stod(values.at(3)) * 1e6);
 
     std::string addrstoken = values.at(7);
     uint64_t start_addr = std::stoull(
@@ -65,40 +61,32 @@ int work() {
     int accesses = std::stoi(values.at(9));
 
     if (records.empty() || records.back().timestamp != ts) {
-      // add new record with one entry
-      struct entry e;
-      e.start_addr = start_addr;
-      e.end_addr = end_addr;
-      e.accesses = accesses;
+      if (!records.empty()) {
+        if (maxmemsize < records.back().memsize)
+          maxmemsize = records.back().memsize;
+        records.clear();
+      }
 
       struct record rec;
       rec.timestamp = ts;
-      rec.nr_regions = nregs;
-      rec.entries.push_back(e);
+      if (accesses >= threshold)
+        rec.memsize = end_addr - start_addr;
+      else
+        rec.memsize = 0;
 
       records.push_back(rec);
     } else {
-      // add new entry to last record
-      struct entry e;
-      e.start_addr = start_addr;
-      e.end_addr = end_addr;
-      e.accesses = accesses;
-      
-      records.back().entries.push_back(e);
+      if (accesses >= threshold)
+        records.back().memsize += end_addr - start_addr;
     }
 
     values.clear();
   }
 
-  uint32_t start_timestamp = records.front().timestamp;
-  for (const auto& rec : records) {
-    double ts = (double)((rec.timestamp - start_timestamp) / 1e6);
-    uint64_t size = 0;
-    for (const auto& e : rec.entries)
-      if (e.accesses >= threshold)
-        size += e.end_addr - e.start_addr;
-    
-    accessedMemorySize.push_back(std::tuple<double, uint64_t>{ts, size});
+  if (!records.empty()) {
+    if (maxmemsize < records.back().memsize)
+      maxmemsize = records.back().memsize;
+    records.clear();
   }
 
   return 0;
@@ -124,16 +112,12 @@ int main(int argc, char* argv[]) {
 
   objKey = inputStr.substr(0, spacePos);
   threshold = std::stoi(inputStr.substr(spacePos + 1));
-
+  
+  records.reserve(1);
   if (__faasmndp_storageCallAndAwait(objKey.data(), objKey.size(), work) != 0)
     return 1;
 
-  std::string output;
-  output.reserve(accessedMemorySize.size() * 4);
-  for (const auto& x : accessedMemorySize) {
-    output += std::to_string(std::get<0>(x)) + ",";
-    output += std::to_string(std::get<0>(x)) + "\n";
-  }
+  std::string output(std::to_string(maxmemsize));
 
   faasmSetOutput(reinterpret_cast<uint8_t*>(output.data()), output.size());
   return 0;
