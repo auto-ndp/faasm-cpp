@@ -25,7 +25,11 @@ ndp_func(sha256sum sha256sum.cpp)
 ndp_func(json_parse json_parse.cpp)
 ndp_func(pcakmm pcakmm.cpp)
 ndp_func(damo damo.cpp)
+ndp_func(substrrepl substrrepl.cpp)
+ndp_func(damofilter damofilter.cpp)
+ndp_func(pcakmmstore pcakmmstore.cpp)
 target_link_libraries(pcakmm Eigen34::Eigen)
+target_link_libraries(pcakmmstore Eigen34::Eigen)
 
 # 23/09/2020 - removing simd
 # WASM-only functions

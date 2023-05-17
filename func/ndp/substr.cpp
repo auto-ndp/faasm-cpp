@@ -35,10 +35,9 @@ int work()
     for (size_t foundPos = objView.find(expression);
          foundPos != string_view::npos;
          foundPos = objView.find(expression, startPos)) {
-        matches.push_back(foundPos);
+        if (matches.size() < max_matches)
+            matches.push_back(foundPos);
         startPos = foundPos + expression.size();
-        if (matches.size() >= max_matches)
-            break;
     }
     uint32_t res = __faasmndp_unmap(objData, fetchedLength);
     return 0;
