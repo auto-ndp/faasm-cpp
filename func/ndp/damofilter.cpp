@@ -14,6 +14,8 @@
 #include <string>
 #include <vector>
 
+using std::string_view;
+
 std::string objKey;
 int threshold = 0;
 
@@ -51,8 +53,7 @@ int work() {
     values.clear();
   }
 
-  const std::string tmp = filtDataStream.str();
-  const char* filteredData = tmp.c_str();
+  const std::string filteredData = filtDataStream.str();
   std::string filtObjKey = objKey + "_filter" + std::to_string(threshold);
 
   int32_t result = __faasmndp_put(filtObjKey.data(), filtObjKey.size(),

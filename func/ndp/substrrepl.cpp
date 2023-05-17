@@ -9,6 +9,8 @@
 #include <string_view>
 #include <vector>
 
+using std::string_view;
+
 std::string objKey;
 std::string findStr;
 std::string replStr;
@@ -70,7 +72,7 @@ int main(int argc, char* argv[]) {
   if (keyEnd < 1 || findStrStart >= findStrEnd || replStrStart >= replStrEnd) {
     const std::string output{
       "FAILED! Input: \"obj_key 'find_str' 'repl_str'\""
-    }
+    };
     faasmSetOutput(reinterpret_cast<const uint8_t*>(output.data()),
       output.size());
     return 0;

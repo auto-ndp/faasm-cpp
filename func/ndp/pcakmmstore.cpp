@@ -15,7 +15,7 @@
 
 using std::string_view;
 
-string_view objKey;
+std::string objKey;
 
 uint32_t endswap32(uint32_t x)
 {
@@ -98,75 +98,51 @@ int work()
   Eigen::MatrixXf pcaTransform = eigenvectors.rightCols(32);
   pcaReducedData = imageData * pcaTransform;
 
-  double* pcaReducedDbl = pcaReducedData.array().cast<double>().data();
-  size_t rows = pcaReducedData.array().rows();
-  size_t cols = pcaReducedData.array().rows();
+  Eigen::ArrayXXd pcaReducedDbl = pcaReducedData.array().cast<double>();
+  size_t rows = pcaReducedData.rows();
+  size_t cols = pcaReducedData.cols();
   size_t pcaReducedSz = rows * cols * sizeof(double);
   std::string newObjKey = objKey + "_pcareduced";
   int32_t result = __faasmndp_put(newObjKey.data(), newObjKey.size(),
-    reinterpret_cast<const uint8_t*>(pcaReducedDbl), pcaReducedSz);
+    reinterpret_cast<const uint8_t*>(pcaReducedDbl.data()), pcaReducedSz);
 
-    if (result != 0) {
-      const string_view output{
-        "Error creating/updating the object with the given key"
-      };
-      faasmSetOutput(reinterpret_cast<const uint8_t*>(output.data()),
-        output.size());
-      return 1;
-    }
+  if (result != 0) {
+    const string_view output{
+      "Error creating/updating the object with the given key"
+    };
+    faasmSetOutput(reinterpret_cast<const uint8_t*>(output.data()),
+      output.size());
+    return 1;
+  }
 
     return 0;
 }
 
 int main(int argc, char* argv[])
 {
-    long inputSz = faasmGetInputSize();
-    std::vector<uint8_t> inputBuf(inputSz);
-    faasmGetInput(inputBuf.data(), inputBuf.size());
-    string_view inputStr(reinterpret_cast<char*>(inputBuf.data()),
-                         inputBuf.size());
-    if (inputStr.size() < 1) {
-        const string_view output{
-            "FAILED - no key/value pair. Usage: grep with input 'key regex'"
-        };
-        faasmSetOutput(reinterpret_cast<const uint8_t*>(output.data()),
-                       output.size());
-        return 0;
-    }
-    objKey = inputStr;
+  long inputSz = faasmGetInputSize();
+  std::vector<uint8_t> inputBuf(inputSz);
+  faasmGetInput(inputBuf.data(), inputBuf.size());
+  std::string inputStr(reinterpret_cast<char*>(inputBuf.data()),
+    inputBuf.size());
 
-    if (__faasmndp_storageCallAndAwait(objKey.data(), objKey.size(), work) !=
-        0) {
-        return 1;
-    }
-
-    const int K = 10;
-    const int n_features = pcaReducedData.cols();
-    const int n_iters = 25;
-    const int seed = 1234567;
-    const int n_examples = pcaReducedData.rows();
-
-    Eigen::ArrayXXd dblData = pcaReducedData.array().cast<double>();
-    Eigen::ArrayXXd mu = Eigen::ArrayXXd::Zero(K, n_features);
-    Eigen::ArrayXd z = Eigen::ArrayXd::Zero(n_examples);
-    RunKMeans(dblData.data(),
-              n_examples,
-              n_features,
-              K,
-              n_iters,
-              seed,
-              "plusplus",
-              mu.data(),
-              z.data());
-
-    std::string output;
-    output.reserve(z.rows() * 4);
-    for (auto& el : z) {
-        output += std::to_string(int(el));
-        output.push_back(' ');
-    }
-    output.push_back('\n');
-
-    faasmSetOutput(reinterpret_cast<uint8_t*>(output.data()), output.size());
+  if (inputStr.size() < 1) {
+    const string_view output{
+      "FAILED - no key/value pair. Usage: grep with input 'key regex'"
+    };
+    faasmSetOutput(reinterpret_cast<const uint8_t*>(output.data()),
+      output.size());
     return 0;
+  }
+
+  objKey = inputStr;
+
+  if (__faasmndp_storageCallAndAwait(objKey.data(), objKey.size(), work) != 0)
+    return 1;
+
+  const std::string output{ "OK" };
+  faasmSetOutput(reinterpret_cast<const uint8_t*>(output.data()),
+    output.size());
+
+   return 0;
 }
