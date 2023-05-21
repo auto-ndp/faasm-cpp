@@ -63,11 +63,11 @@ int main(int argc, char* argv[]) {
   std::string inputStr(reinterpret_cast<char*>(inputBuf.data()),
     inputBuf.size());
   
-  size_t keyEnd = inputStr.find_first_of(" '");
-  size_t findStrStart = keyEnd + 2;
-  size_t findStrEnd = inputStr.find_first_of("' '");
-  size_t replStrStart = findStrEnd + 3;
-  size_t replStrEnd = inputStr.length() - 1;
+  size_t keyEnd = inputStr.find(' ');
+  size_t findStrStart = inputStr.find('\'', keyEnd) + 1;
+  size_t findStrEnd = inputStr.find('\'', findStrStart);
+  size_t replStrStart = inputStr.find('\'', findStrEnd + 1) + 1;
+  size_t replStrEnd = inputStr.find('\'', replStrStart);
 
   if (keyEnd < 1 || findStrStart >= findStrEnd || replStrStart >= replStrEnd) {
     const std::string output{

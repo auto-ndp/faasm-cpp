@@ -14,7 +14,7 @@ using std::string_view;
 string_view objKey;
 string_view expression;
 std::vector<size_t> matches;
-int max_matches = 5;
+int max_matches = 64;
 
 int work()
 {
