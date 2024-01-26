@@ -11,7 +11,11 @@ from faasmtools.endpoints import (
     get_faasm_upload_host_port,
     get_knative_headers,
 )
+
+# Load Balancer imports
 from faasmtools.compile_util import wasm_cmake, wasm_copy_upload
+from faasmloadbalancer.RoundRobinLoadBalancer import RoundRobinLoadBalancerStrategy
+from faasmloadbalancer.WorkerHashLoadBalancer import WorkerHashLoadBalancerStrategy
 
 FAABRIC_MSG_TYPE_FLUSH = 3
 
@@ -19,6 +23,10 @@ FUNC_DIR = join(PROJ_ROOT, "func")
 FUNC_BUILD_DIR = join(PROJ_ROOT, "build", "func")
 NATIVE_FUNC_BUILD_DIR = join(PROJ_ROOT, "build", "native-func")
 
+WORKER_ADDRESSES = ['worker-0', 'worker-1', 'worker-2']
+
+round_robin_balancer = RoundRobinLoadBalancerStrategy(WORKER_ADDRESSES)
+worker_hash_balancer = WorkerHashLoadBalancerStrategy(WORKER_ADDRESSES)
 
 def _get_all_user_funcs(user):
     # Work out all the functions for this user (that we assume will have been
@@ -99,16 +107,21 @@ def upload_user(ctx, user):
 
 
 @task
-def invoke(ctx, user, func, input_data=None, mpi=None, graph=False):
+def invoke(ctx, user, func, input_data, mpi=None, graph=False):
     """
     Invoke a given function
     """
-    host, port = get_faasm_invoke_host_port()
-    url = "http://{}:{}".format(host, port)
+    # host, port = get_faasm_invoke_host_port()
+    host = "worker-0"
+    port = 8080
+    url = "http://{}:{}/f/".format(host, port)
     data = {
         "function": func,
         "user": user,
     }
+    
+    print("Invoking function: {}_{}".format(user, func))
+    print("Connecting to: {}".format(url))
 
     if input_data:
         data["input_data"] = input_data
@@ -120,7 +133,11 @@ def invoke(ctx, user, func, input_data=None, mpi=None, graph=False):
         data["record_exec_graph"] = True
         data["async"] = True
 
-    headers = get_knative_headers()
+    # headers = get_knative_headers()
+    headers =  { "Content-Type" : "application/json" }
+    print("Headers: {}".format(headers))
+    print("Data: {}".format(data))
+    
     response = requests.post(url, json=data, headers=headers)
 
     if response.status_code != 200:
@@ -129,7 +146,63 @@ def invoke(ctx, user, func, input_data=None, mpi=None, graph=False):
 
     print("Success:\n{}".format(response.text))
 
+@task
+def dispatch_function(ctx, user, func, input_data, load_balance_strategy, mpi=None, graph=False):
+    print("Running function: {}_{}".format(user, func))
+    print("Initialising load balancer")
+    
+    # Write a function that retrieves the addresses of the workers
+    # and writes them to a file
+    # Then, run the load balancer
+    # Then, invoke the function
+    # Then, kill the load balancer
+    # Then, read the file and print the results
+    # Then, delete the file
+    
+    host, port = get_faasm_invoke_host_port()
+    
+    balancer = get_load_balancer("roundrobin")
+    worker_to_run_on = balancer.get_next_host()
+    print("Running on worker: {}".format(worker_to_run_on))
+    
+    port = 8080
+    url = "http://{}:{}/f/".format(worker_to_run_on, port)
+    data = {
+        "function": func,
+        "user": user,
+    }
+    
+    print("Invoking function: {}_{}".format(user, func))
+    print("Connecting to: {}".format(url))
 
+    if input_data:
+        data["input_data"] = input_data
+
+    if mpi is not None:
+        data["mpi_world_size"] = int(mpi)
+
+    if graph:
+        data["record_exec_graph"] = True
+        data["async"] = True
+
+    # headers = get_knative_headers()
+    headers =  { "Content-Type" : "application/json" }
+    print("Headers: {}".format(headers))
+    print("Data: {}".format(data))
+    
+    response = requests.post(url, json=data, headers=headers)
+
+    if response.status_code != 200:
+        print("Error ({}):\n{}".format(response.status_code, response.text))
+        exit(1)
+
+    print("Success:\n{}".format(response.text))
+
+@task
+def test_load_balancer(ctx, user, func, input_data):
+    for i in range(0, 10):
+        dispatch_function(ctx, user, func, input_data)
+        
 @task
 def update(ctx, user, func, clean=False, debug=False, native=False):
     """
@@ -147,12 +220,20 @@ def flush(ctx):
     """
     Flush the Faasm cluster
     """
-    headers = get_knative_headers()
-    host, port = get_faasm_invoke_host_port()
-
+    # headers = get_knative_headers()
+    # host, port = get_faasm_invoke_host_port()
+    headers = { "Content-Type" : "application/json" }
+    host = "worker-0"
+    port = 8080
     url = "http://{}:{}".format(host, port)
     data = {"type": FAABRIC_MSG_TYPE_FLUSH}
-    response = requests.post(url, json=data, headers=headers)
+    print("Flushing Faasm cluster at: {}".format(url))
+    try:
+        response = requests.post(url, json=data, headers=headers, timeout=10)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(f"Request failed: {e}")
+        return
 
     print("Flush response {}: {}".format(response.status_code, response.text))
 
@@ -180,3 +261,16 @@ def local(ctx, clean=False, debug=False):
     user(ctx, "errors", clean, debug)
     user(ctx, "mpi", clean, debug)
     user(ctx, "omp", clean, debug)
+
+
+def get_load_balancer(strategy_name: str):
+    if (strategy_name.lower() == "roundrobin" or strategy_name.lower() == "round_robin"):
+        print("Using round robin load balancer")
+        return round_robin_balancer
+    elif (strategy_name.lower() == "workerhash" or strategy_name.lower() == "worker_hash"):
+        print("Using worker hash load balancer")
+        return worker_hash_balancer
+    else:
+        print("Invalid load balancer strategy name: {}".format(strategy_name))
+        print("Returning round robin load balancer by default")
+        return round_robin_balancer
