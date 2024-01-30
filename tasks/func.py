@@ -2,9 +2,13 @@ from os import makedirs, listdir
 from os.path import join, exists, splitext
 from shutil import rmtree
 from subprocess import run
+import time
 import requests
 from invoke import task
 
+import aiohttp
+from aiohttp import ClientSession
+import asyncio
 from faasmtools.env import PROJ_ROOT
 from faasmtools.endpoints import (
     get_faasm_invoke_host_port,
@@ -147,7 +151,7 @@ def invoke(ctx, user, func, input_data, mpi=None, graph=False):
     print("Success:\n{}".format(response.text))
 
 @task
-def dispatch_function(ctx, user, func, input_data, load_balance_strategy, mpi=None, graph=False):
+async def dispatch_function(ctx, user, func, input_data, load_balance_strategy, session, mpi=None, graph=False):
     print("Running function: {}_{}".format(user, func))
     print("Initialising load balancer")
     
@@ -163,7 +167,8 @@ def dispatch_function(ctx, user, func, input_data, load_balance_strategy, mpi=No
     
     balancer = get_load_balancer("roundrobin")
     worker_to_run_on = balancer.get_next_host()
-    print("Running on worker: {}".format(worker_to_run_on))
+    worker_to_run_on = "worker-1"
+    # print("Running on worker: {}".format(worker_to_run_on))
     
     port = 8080
     url = "http://{}:{}/f/".format(worker_to_run_on, port)
@@ -175,6 +180,8 @@ def dispatch_function(ctx, user, func, input_data, load_balance_strategy, mpi=No
     print("Invoking function: {}_{}".format(user, func))
     print("Connecting to: {}".format(url))
 
+    data["forbid_ndp"] = False
+    data["async"] = False
     if input_data:
         data["input_data"] = input_data
 
@@ -190,18 +197,32 @@ def dispatch_function(ctx, user, func, input_data, load_balance_strategy, mpi=No
     print("Headers: {}".format(headers))
     print("Data: {}".format(data))
     
-    response = requests.post(url, json=data, headers=headers)
-
-    if response.status_code != 200:
-        print("Error ({}):\n{}".format(response.status_code, response.text))
-        exit(1)
-
-    print("Success:\n{}".format(response.text))
+    async with session.post(url, json=data, headers=headers) as response:
+        if response.status != 200:
+            text = await response.text()
+            print(f"Error ({response.status}):\n{text}")
+            exit(1)
+        else:
+            print("Success:\n{}".format(await response.text()))
+            return await response.text()
 
 @task
-def test_load_balancer(ctx, user, func, input_data):
+def test_load_balancer_async(ctx, user, func, input_data):
+    def run_async_code():
+        async def main():
+            async with aiohttp.ClientSession() as session:
+                tasks = []
+                for i in range(0, 10):
+                    tasks.append(dispatch_function(ctx, user, func, input_data, "roundrobin", session))
+                responses = await asyncio.gather(*tasks)
+                return responses
+        return asyncio.run(main())
+    run_async_code()
+    
+@task
+def test_load_balancer_sync(ctx, user, func, input_data):
     for i in range(0, 10):
-        dispatch_function(ctx, user, func, input_data)
+        invoke(ctx, user, func, input_data)
         
 @task
 def update(ctx, user, func, clean=False, debug=False, native=False):
