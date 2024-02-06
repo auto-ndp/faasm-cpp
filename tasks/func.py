@@ -184,6 +184,8 @@ def dispatch_function(ctx, user, func, input_data, load_balance_strategy, mpi=No
     if graph:
         data["record_exec_graph"] = True
         data["async"] = True
+        
+    data['async'] = True
 
     # headers = get_knative_headers()
     headers =  { "Content-Type" : "application/json" }
