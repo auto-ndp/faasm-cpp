@@ -204,7 +204,14 @@ def dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_
 
 @task
 def test_load_balancer(ctx, user, func, input_data, load_balance_strategy, n, async_toggle):
+    
     number_iterations = int(n)
+    
+    if async_toggle.lower() == "true":
+        async_toggle = True
+    else:
+        async_toggle = False
+        
     for i in range(0, number_iterations):
         print("Iteration: {}/{}".format(i, number_iterations))
         dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_toggle)
