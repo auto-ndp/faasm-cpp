@@ -192,7 +192,7 @@ def dispatch_function(ctx, user, func, input_data, load_balance_strategy, mpi=No
     
     response = requests.post(url, json=data, headers=headers)
     
-    print("Latency: {}".format(response.elapsed.total_seconds())
+    print("Latency: {}".format(response.elapsed.total_seconds()))
 
     if response.status_code != 200:
         print("Error ({}):\n{}".format(response.status_code, response.text))
