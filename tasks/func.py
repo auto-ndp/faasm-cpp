@@ -147,7 +147,7 @@ def invoke(ctx, user, func, input_data, mpi=None, graph=False):
     print("Success:\n{}".format(response.text))
 
 @task
-def dispatch_function(ctx, user, func, input_data, load_balance_strategy, mpi=None, graph=False):
+def dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_toggle, mpi=None, graph=False):
     print("Running function: {}_{}".format(user, func))
     print("Initialising load balancer")
     
@@ -185,7 +185,7 @@ def dispatch_function(ctx, user, func, input_data, load_balance_strategy, mpi=No
         data["record_exec_graph"] = True
         data["async"] = True
         
-    data['async'] = True
+    data['async'] = bool(async_toggle)
 
     # headers = get_knative_headers()
     headers =  { "Content-Type" : "application/json" }
@@ -203,11 +203,11 @@ def dispatch_function(ctx, user, func, input_data, load_balance_strategy, mpi=No
     print("Success:\n{}".format(response.text))
 
 @task
-def test_load_balancer(ctx, user, func, input_data, load_balance_strategy, n):
+def test_load_balancer(ctx, user, func, input_data, load_balance_strategy, n, async_toggle):
     number_iterations = int(n)
     for i in range(0, number_iterations):
         print("Iteration: {}/{}".format(i, number_iterations))
-        dispatch_function(ctx, user, func, input_data, load_balance_strategy)
+        dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_toggle)
         
 @task
 def update(ctx, user, func, clean=False, debug=False, native=False):
