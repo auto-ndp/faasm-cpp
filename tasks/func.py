@@ -200,7 +200,8 @@ def dispatch_function(ctx, user, func, input_data, load_balance_strategy, mpi=No
 
 @task
 def test_load_balancer(ctx, user, func, input_data, load_balance_strategy, n):
-    for i in range(0, n):
+    number_iterations = int(n)
+    for i in range(0, number_iterations):
         dispatch_function(ctx, user, func, input_data, load_balance_strategy)
         
 @task
