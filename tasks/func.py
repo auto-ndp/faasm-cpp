@@ -162,7 +162,7 @@ def dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_
     host, port = get_faasm_invoke_host_port()
     
     balancer = get_load_balancer(load_balance_strategy)
-    worker_to_run_on = balancer.get_next_host()
+    worker_to_run_on = balancer.get_next_host(user + "_" + func)
     print("Running on worker: {}".format(worker_to_run_on))
     
     port = 8080
