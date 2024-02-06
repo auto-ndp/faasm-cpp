@@ -199,9 +199,9 @@ def dispatch_function(ctx, user, func, input_data, load_balance_strategy, mpi=No
     print("Success:\n{}".format(response.text))
 
 @task
-def test_load_balancer(ctx, user, func, input_data):
+def test_load_balancer(ctx, user, func, input_data, load_balance_strategy):
     for i in range(0, 10):
-        dispatch_function(ctx, user, func, input_data)
+        dispatch_function(ctx, user, func, input_data, load_balance_strategy)
         
 @task
 def update(ctx, user, func, clean=False, debug=False, native=False):
