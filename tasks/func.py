@@ -147,7 +147,7 @@ def invoke(ctx, user, func, input_data, mpi=None, graph=False):
     print("Success:\n{}".format(response.text))
 
 @task
-def dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_toggle, mpi=None, graph=False):
+def dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_toggle, forbid_ndp, mpi=None, graph=False):
     print("Running function: {}_{}".format(user, func))
     print("Initialising load balancer")
     
@@ -161,7 +161,7 @@ def dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_
     
     host, port = get_faasm_invoke_host_port()
     
-    balancer = get_load_balancer("roundrobin")
+    balancer = get_load_balancer(load_balance_strategy)
     worker_to_run_on = balancer.get_next_host()
     print("Running on worker: {}".format(worker_to_run_on))
     
@@ -186,7 +186,9 @@ def dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_
         data["async"] = True
     
     data['async'] = bool(async_toggle)
+    data['forbid_ndp'] = bool(forbid_ndp)
     print("Async: {}".format(data['async']))
+    print("Forbid_ndp: {}".format(data['forbid_ndp']))
     # headers = get_knative_headers()
     headers =  { "Content-Type" : "application/json" }
     print("Headers: {}".format(headers))
@@ -203,7 +205,7 @@ def dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_
     print("Success:\n{}".format(response.text))
 
 @task
-def test_load_balancer(ctx, user, func, input_data, load_balance_strategy, n, async_toggle):
+def test_load_balancer(ctx, user, func, input_data, load_balance_strategy, n, async_toggle, forbid_ndp):
     
     number_iterations = int(n)
     
@@ -212,9 +214,14 @@ def test_load_balancer(ctx, user, func, input_data, load_balance_strategy, n, as
     else:
         async_toggle = False
         
+    if forbid_ndp.lower() == "true":
+        forbid_ndp = True
+    else:
+        forbid_ndp = False
+        
     for i in range(0, number_iterations):
         print("Iteration: {}/{}".format(i, number_iterations))
-        dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_toggle)
+        dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_toggle, forbid_ndp)
         
 @task
 def update(ctx, user, func, clean=False, debug=False, native=False):
