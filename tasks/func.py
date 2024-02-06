@@ -202,6 +202,7 @@ def dispatch_function(ctx, user, func, input_data, load_balance_strategy, mpi=No
 def test_load_balancer(ctx, user, func, input_data, load_balance_strategy, n):
     number_iterations = int(n)
     for i in range(0, number_iterations):
+        print("Iteration: {}/{}".format(i, number_iterations))
         dispatch_function(ctx, user, func, input_data, load_balance_strategy)
         
 @task
