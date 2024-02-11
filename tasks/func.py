@@ -3,6 +3,7 @@ from os.path import join, exists, splitext
 from shutil import rmtree
 from subprocess import run
 import requests
+import time
 from invoke import task
 
 from faasmtools.env import PROJ_ROOT
@@ -204,6 +205,8 @@ def dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_
     
     print("Success!")
     print("-----------------------------")
+    
+    return response.elapsed.total_seconds()
 
 @task
 def test_load_balancer(ctx, user, func, input_data, load_balance_strategy, n, async_toggle, forbid_ndp):
@@ -220,9 +223,15 @@ def test_load_balancer(ctx, user, func, input_data, load_balance_strategy, n, as
     else:
         forbid_ndp = False
         
+    # create file to store results
+    results_file = open("./experiments/results/" + time.strftime("%Y%m%d-%H%M%S") + "_results.csv", "w")
+    
     for i in range(0, number_iterations):
         print("Iteration: {}/{}".format(i, number_iterations))
-        dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_toggle, forbid_ndp)
+        latency = dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_toggle, forbid_ndp)
+        
+        # write iteration number and latency to file
+        results_file.write(str(i) + "," + str(latency) + "\n")
         
 @task
 def update(ctx, user, func, clean=False, debug=False, native=False):
