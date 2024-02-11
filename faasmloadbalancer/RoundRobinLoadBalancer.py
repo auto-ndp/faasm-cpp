@@ -6,5 +6,5 @@ class RoundRobinLoadBalancerStrategy(ILoadBalanceStrategy):
         self.workers = workers
         self.worker_iterator = itertools.cycle(workers)
         
-    def get_next_host(self):
+    def get_next_host(self, user=None, func_name=None):
         return next(self.worker_iterator)
