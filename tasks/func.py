@@ -242,21 +242,7 @@ def test_load_balancer(ctx, user, func, input_data, load_balance_strategy, n, as
         for i in range(0, number_iterations):
             print("Iteration: {}/{}".format(i, number_iterations))
             latency = dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_toggle, forbid_ndp)
-            
-            # write iteration number and latency to file
             results_file.write(str(i) + "," + str(latency) + "\n")
-
-    with open(fp, "r") as results_file:
-        msg = EmailMessage()
-        msg.set_content(results_file.read())
-        
-    msg['Subject'] = 'Results for load balancer test'
-    msg['From'] = 'donald.jennings@autondp.com'
-    msg['To'] = 'D.D.Jennings@outlook.com'
-    
-    s = smtplib.SMTP('localhost')
-    s.send_message(msg)
-    s.quit()
     
         
 @task
