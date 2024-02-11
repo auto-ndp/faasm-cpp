@@ -1,5 +1,4 @@
 import time
-import matplotlib.pyplot as plt
 
 
 def run_benchmark(gutenberg_title, user, func, num_runs=10):
