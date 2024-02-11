@@ -226,6 +226,7 @@ def test_load_balancer(ctx, user, func, input_data, load_balance_strategy, n, as
     # create file to store results
     results_file = open("./experiments/results/" + time.strftime("%Y%m%d-%H%M%S") + "_" + load_balance_strategy + "_results.csv", "a")
     
+    results_file.write("Input data" + "," + input_data + "\n")
     results_file.write("user" + "," + user + "\n")
     results_file.write("function" + "," + func + "\n")
     results_file.write("async toggle" + "," + str(async_toggle) + "\n")
