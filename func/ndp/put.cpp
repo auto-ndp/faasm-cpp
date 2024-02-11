@@ -7,40 +7,26 @@
 
 #include <string_view>
 #include <vector>
-#include <fstream>
-#include <sstream>
-#include <iostream>
 
 using std::string_view;
 
 int main(int argc, char* argv[])
 {
-    if (argc != 3) {
-        const string_view output{
-            "FAILED - no key/file pair. Usage: put_simple with input 'key file'"
-        };
+    long inputSz = faasmGetInputSize();
+    std::vector<uint8_t> inputBuf(inputSz);
+    faasmGetInput(inputBuf.data(), inputBuf.size());
+    string_view inputStr(reinterpret_cast<char*>(inputBuf.data()),
+                         inputBuf.size());
+    size_t keyEnd = inputStr.find_first_of(' ');
+    if (inputStr.size() < 2 || keyEnd == string_view::npos) {
+        const string_view output{ "FAILED - no key/value pair. Usage: "
+                                  "put_simple with input 'key value'" };
         faasmSetOutput(reinterpret_cast<const uint8_t*>(output.data()),
                        output.size());
         return 2;
     }
-
-    const string_view objKey{ argv[1] };
-
-    std::cout << "Opening file: " << argv[2] << std::endl;
-    std::ifstream file(argv[2]);
-    if (!file) {
-        const string_view output{
-            "FAILED - could not open file"
-        };
-        faasmSetOutput(reinterpret_cast<const uint8_t*>(output.data()),
-                       output.size());
-        return 1;
-    }
-
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    std::string fileContents = buffer.str();
-    const string_view objValue{ fileContents };
+    const string_view objKey{ inputStr.substr(0, keyEnd) };
+    const string_view objValue{ inputStr.substr(keyEnd + 1) };
 
     int32_t result =
       __faasmndp_put(objKey.data(),
