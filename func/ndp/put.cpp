@@ -25,6 +25,7 @@ int main(int argc, char* argv[])
 
     const string_view objKey{ argv[1] };
 
+    std::cout << "Opening file: " << argv[2] << std::endl;
     std::ifstream file(argv[2]);
     if (!file) {
         const string_view output{

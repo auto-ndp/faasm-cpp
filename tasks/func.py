@@ -145,7 +145,7 @@ def invoke(ctx, user, func, input_data, mpi=None, graph=False):
         exit(1)
 
     print("Success:\n{}".format(response.text))
-
+    
 @task
 def dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_toggle, forbid_ndp, mpi=None, graph=False):
     print("Running function: {}_{}".format(user, func))
