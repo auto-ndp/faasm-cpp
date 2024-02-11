@@ -139,7 +139,7 @@ def invoke(ctx, user, func, input_data, mpi=None, graph=False):
     print("Data: {}".format(data))
     
     response = requests.post(url, json=data, headers=headers)
-
+    print("Latency: {}".format(response.elapsed.total_seconds()))
     if response.status_code != 200:
         print("Error ({}):\n{}".format(response.status_code, response.text))
         exit(1)
