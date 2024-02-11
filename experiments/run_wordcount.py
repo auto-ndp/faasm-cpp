@@ -14,7 +14,9 @@ def run_benchmark(gutenberg_title, user, func, num_runs=10):
         print("Key: ", gutenberg_title)
         put_cmd = "inv func.invoke " + user + " put " + "\'" + gutenberg_title + " " + text + "\'"
         print("Command: ", put_cmd[:100])
-        subprocess.run(put_cmd, shell=True)
+        
+        process = subprocess.Popen(put_cmd, shell=True, stdout=subprocess.PIPE)
+        process.communicate(input=text.encode())
         print("Time taken to upload the text to the user's storage: ", time.time() - start)
         
         
