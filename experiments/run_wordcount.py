@@ -6,7 +6,7 @@ def run_benchmark(gutenberg_title, user, func, num_runs=10):
 
     # Get the text
     with open("./text_sources/{}.txt".format(gutenberg_title), "r") as f:
-        text = f.read().replace("\n", " ")
+        text = f.read().replace("\n", " ")[:1000]
         
         # Upload the txt to the user's storage
         start = time.time()
