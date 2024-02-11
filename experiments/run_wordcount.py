@@ -13,7 +13,6 @@ def run_benchmark(gutenberg_title, user, func, num_runs=10):
         print("Calling inv func.invoke to upload the text to the user's storage")
         print("Key: ", gutenberg_title)
         put_cmd = "inv func.invoke " + user + " put " + "\'" + gutenberg_title + " " + text + "\'"
-        print("Command: ", put_cmd[:100])
         
         process = subprocess.Popen(put_cmd, stdin=subprocess.PIPE)
         process.communicate(input=text.encode())
@@ -29,4 +28,4 @@ def run_benchmark(gutenberg_title, user, func, num_runs=10):
         
 if __name__ == "__main__":
     # Run the benchmark
-    run_benchmark("kjv_bible", "ndp", "wordcount")
+    run_benchmark("pride_and_prejudice", "ndp", "wordcount")
