@@ -1,5 +1,6 @@
 import time
 import os
+import subprocess
 
 def run_benchmark(gutenberg_title, user, func, num_runs=10):
 
@@ -13,7 +14,7 @@ def run_benchmark(gutenberg_title, user, func, num_runs=10):
         print("Key: ", gutenberg_title)
         put_cmd = "inv func.invoke " + user + " put " + "\'" + gutenberg_title + " " + text + "\'"
         print("Command: ", put_cmd[:100])
-        os.system(put_cmd)
+        subprocess.run(put_cmd, shell=True)
         print("Time taken to upload the text to the user's storage: ", time.time() - start)
         
         
@@ -21,7 +22,7 @@ def run_benchmark(gutenberg_title, user, func, num_runs=10):
         function_cmd = "inv func.invoke " + user + " " + func + " \'" + gutenberg_title + "\'"
         print("Command: ", function_cmd)
         wordcount_time = time.time()
-        os.system(function_cmd)
+        subprocess.run(function_cmd, shell=True)
         print("Time taken to run the wordcount on the text: ", time.time() - wordcount_time)
         
 if __name__ == "__main__":
