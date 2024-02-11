@@ -12,10 +12,8 @@ def run_benchmark(gutenberg_title, user, func, num_runs=10):
         start = time.time()
         print("Calling inv func.invoke to upload the text to the user's storage")
         print("Key: ", gutenberg_title)
-        put_cmd = "inv func.invoke " + user + " put " + "\'" + gutenberg_title + " " + text + "\'"
-        
-        process = subprocess.Popen(put_cmd, stdin=subprocess.PIPE)
-        process.communicate(input=text.encode())
+        put_cmd = "rados put -p " + user + " ./text_sources/{}.txt".format(gutenberg_title)
+        os.system(put_cmd)
         print("Time taken to upload the text to the user's storage: ", time.time() - start)
         
         
