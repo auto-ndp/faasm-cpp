@@ -18,6 +18,10 @@ from faasmtools.compile_util import wasm_cmake, wasm_copy_upload
 from faasmloadbalancer.RoundRobinLoadBalancer import RoundRobinLoadBalancerStrategy
 from faasmloadbalancer.WorkerHashLoadBalancer import WorkerHashLoadBalancerStrategy
 
+# DEBUGGING
+import smtplib
+from email.message import EmailMessage
+
 FAABRIC_MSG_TYPE_FLUSH = 3
 
 FUNC_DIR = join(PROJ_ROOT, "func")
@@ -224,21 +228,36 @@ def test_load_balancer(ctx, user, func, input_data, load_balance_strategy, n, as
         forbid_ndp = False
         
     # create file to store results
-    results_file = open("./experiments/results/" + time.strftime("%Y%m%d-%H%M%S") + "_" + load_balance_strategy + "_results.csv", "a")
+    fp = "./experiments/results/" + time.strftime("%Y%m%d-%H%M%S") + "_" + load_balance_strategy + "_results.csv"
+    results_file = open(fp, "a")
     
-    results_file.write("Input data" + "," + input_data + "\n")
-    results_file.write("user" + "," + user + "\n")
-    results_file.write("function" + "," + func + "\n")
-    results_file.write("async toggle" + "," + str(async_toggle) + "\n")
-    results_file.write("forbid ndp" + "," + str(forbid_ndp) + "\n")
-    results_file.write("load balance strategy" + "," + load_balance_strategy + "\n")
-    results_file.write("iteration, latency\n")
-    for i in range(0, number_iterations):
-        print("Iteration: {}/{}".format(i, number_iterations))
-        latency = dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_toggle, forbid_ndp)
+    with open(fp, "a") as results_file:
+        results_file.write("Input data" + "," + input_data + "\n")
+        results_file.write("user" + "," + user + "\n")
+        results_file.write("function" + "," + func + "\n")
+        results_file.write("async toggle" + "," + str(async_toggle) + "\n")
+        results_file.write("forbid ndp" + "," + str(forbid_ndp) + "\n")
+        results_file.write("load balance strategy" + "," + load_balance_strategy + "\n")
+        results_file.write("iteration, latency\n")
+        for i in range(0, number_iterations):
+            print("Iteration: {}/{}".format(i, number_iterations))
+            latency = dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_toggle, forbid_ndp)
+            
+            # write iteration number and latency to file
+            results_file.write(str(i) + "," + str(latency) + "\n")
+
+    with open(fp, "r") as results_file:
+        msg = EmailMessage()
+        msg.set_content(results_file.read())
         
-        # write iteration number and latency to file
-        results_file.write(str(i) + "," + str(latency) + "\n")
+    msg['Subject'] = 'Results for load balancer test'
+    msg['From'] = 'donald.jennings@autondp.com'
+    msg['To'] = 'D.D.Jennings@outlook.com'
+    
+    s = smtplib.SMTP('localhost')
+    s.send_message(msg)
+    s.quit()
+    
         
 @task
 def update(ctx, user, func, clean=False, debug=False, native=False):
