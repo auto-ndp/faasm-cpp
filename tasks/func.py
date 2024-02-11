@@ -142,8 +142,7 @@ def invoke(ctx, user, func, input_data, mpi=None, graph=False):
     if response.status_code != 200:
         print("Error ({}):\n{}".format(response.status_code, response.text))
         exit(1)
-
-    print("Success:\n{}".format(response.text))
+        
     print("Latency: {}".format(response.elapsed.total_seconds()))
     print("-----------------------------")
     
@@ -204,6 +203,7 @@ def dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_
         exit(1)
     
     print("Success!")
+    print("-----------------------------")
 
 @task
 def test_load_balancer(ctx, user, func, input_data, load_balance_strategy, n, async_toggle, forbid_ndp):
