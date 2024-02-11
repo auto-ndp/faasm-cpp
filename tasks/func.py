@@ -224,7 +224,7 @@ def test_load_balancer(ctx, user, func, input_data, load_balance_strategy, n, as
         forbid_ndp = False
         
     # create file to store results
-    results_file = open("./experiments/results/" + time.strftime("%Y%m%d-%H%M%S") + "_results.csv", "w")
+    results_file = open("./experiments/results/" + time.strftime("%Y%m%d-%H%M%S") + "_results.csv", "a")
     
     for i in range(0, number_iterations):
         print("Iteration: {}/{}".format(i, number_iterations))
