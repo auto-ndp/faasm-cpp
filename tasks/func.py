@@ -139,12 +139,13 @@ def invoke(ctx, user, func, input_data, mpi=None, graph=False):
     print("Data: {}".format(data))
     
     response = requests.post(url, json=data, headers=headers)
-    print("Latency: {}".format(response.elapsed.total_seconds()))
     if response.status_code != 200:
         print("Error ({}):\n{}".format(response.status_code, response.text))
         exit(1)
 
-    print("Success:\n{}".format(response.text))
+    print("Success:\n{}".format(response.text]))
+    print("Latency: {}".format(response.elapsed.total_seconds()))
+    print("-----------------------------")
     
 @task
 def dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_toggle, forbid_ndp, mpi=None, graph=False):
