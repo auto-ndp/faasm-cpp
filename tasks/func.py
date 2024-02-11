@@ -224,8 +224,14 @@ def test_load_balancer(ctx, user, func, input_data, load_balance_strategy, n, as
         forbid_ndp = False
         
     # create file to store results
-    results_file = open("./experiments/results/" + time.strftime("%Y%m%d-%H%M%S") + "_results.csv", "a")
+    results_file = open("./experiments/results/" + time.strftime("%Y%m%d-%H%M%S") + "_" + load_balance_strategy + "_results.csv", "a")
     
+    results_file.write("user" + "," + user + "\n")
+    results_file.write("function" + "," + func + "\n")
+    results_file.write("async toggle" + "," + str(async_toggle) + "\n")
+    results_file.write("forbid ndp" + "," + str(forbid_ndp) + "\n")
+    results_file.write("load balance strategy" + "," + load_balance_strategy + "\n")
+    results_file.write("iteration, latency\n")
     for i in range(0, number_iterations):
         print("Iteration: {}/{}".format(i, number_iterations))
         latency = dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_toggle, forbid_ndp)
