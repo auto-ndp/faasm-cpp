@@ -41,7 +41,11 @@ if __name__ == "__main__":
     args = arg_parser.parse_args()
     
     LOAD_BALANCE_STRATEGY = args.load_balance_strategy
-    ASYNC_TOGGLED = args.async_toggle
-    FORBID_NDP = args.forbid_ndp
+    
+    if args.async_toggle.lower() == "true":
+        ASYNC_TOGGLED = True
+    
+    if args.forbid_ndp.lower() == "true":
+        FORBID_NDP = True
     
     asyncio.run(benchmark_async(args.user, args.func, args.input_data, args.num_runs))
