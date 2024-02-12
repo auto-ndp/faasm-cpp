@@ -16,7 +16,7 @@ async def dispatch_func_async(user, func, input_data):
 
 async def benchmark_async(user, func, input_data, num_runs=DEFAULT_RUNS):
     tasks = []
-    for i in range(num_runs):
+    for i in range(1, num_runs+1):
         task = asyncio.ensure_future(dispatch_func_async(user, func, input_data))
         tasks.append(task)
         await asyncio.sleep(1/i)
