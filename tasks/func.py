@@ -243,8 +243,7 @@ def test_load_balancer(ctx, user, func, input_data, load_balance_strategy, n, as
             print("Iteration: {}/{}".format(i, number_iterations))
             latency = dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_toggle, forbid_ndp)
             results_file.write(str(i) + "," + str(latency) + "\n")
-    
-        
+   
 @task
 def update(ctx, user, func, clean=False, debug=False, native=False):
     """
