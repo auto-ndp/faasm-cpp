@@ -8,7 +8,7 @@ ASYNC_TOGGLED = False
 DEFAULT_RUNS = 10
 
 async def dispatch_func_async(user, func, input_data):
-    cmd = ["inv", "func.dispatch_function", user, func, input_data, LOAD_BALANCE_STRATEGY, ASYNC_TOGGLED, FORBID_NDP]
+    cmd = ["inv", "func.dispatch-function", user, func, input_data, LOAD_BALANCE_STRATEGY, ASYNC_TOGGLED, FORBID_NDP]
     process = await asyncio.create_subprocess_exec(*cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     stdout, stderr = await process.communicate()
     print(f'[{cmd!r} exited with {process.returncode}]')
