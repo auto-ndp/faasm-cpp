@@ -35,8 +35,8 @@ if __name__ == "__main__":
     arg_parser.add_argument("input_data", help="Input data for function")
     arg_parser.add_argument("num_runs", help="Number of runs to perform", type=int, default=10)
     arg_parser.add_argument("load_balance_strategy", help="Load balance strategy to use")
-    arg_parser.add_argument("async_toggle", help="Toggle async behaviour")
-    arg_parser.add_argument("forbid_ndp", help="Toggle NDP")
+    arg_parser.add_argument("async_toggle", help="Toggle async behaviour", type=bool, default=False)
+    arg_parser.add_argument("forbid_ndp", help="Toggle NDP", type=bool, default=False)
     
     args = arg_parser.parse_args()
     
