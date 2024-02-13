@@ -18,10 +18,6 @@ from faasmtools.compile_util import wasm_cmake, wasm_copy_upload
 from faasmloadbalancer.RoundRobinLoadBalancer import RoundRobinLoadBalancerStrategy
 from faasmloadbalancer.WorkerHashLoadBalancer import WorkerHashLoadBalancerStrategy
 
-# DEBUGGING
-import smtplib
-from email.message import EmailMessage
-
 FAABRIC_MSG_TYPE_FLUSH = 3
 
 FUNC_DIR = join(PROJ_ROOT, "func")
@@ -189,9 +185,7 @@ def dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_
     if graph:
         data["record_exec_graph"] = True
         data["async"] = True
-    
-    data['async'] = bool(async_toggle)
-    data['forbid_ndp'] = bool(forbid_ndp)
+
     print("Async: {}".format(data['async']))
     print("Forbid_ndp: {}".format(data['forbid_ndp']))
     # headers = get_knative_headers()
@@ -212,38 +206,7 @@ def dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_
     
     return response.elapsed.total_seconds()
 
-@task
-def test_load_balancer(ctx, user, func, input_data, load_balance_strategy, n, async_toggle, forbid_ndp):
-    
-    number_iterations = int(n)
-    
-    if async_toggle.lower() == "true":
-        async_toggle = True
-    else:
-        async_toggle = False
-        
-    if forbid_ndp.lower() == "true":
-        forbid_ndp = True
-    else:
-        forbid_ndp = False
-        
-    # create file to store results
-    fp = "./experiments/results/" + time.strftime("%Y%m%d-%H%M%S") + "_" + load_balance_strategy + "_results.csv"
-    results_file = open(fp, "a")
-    
-    with open(fp, "a") as results_file:
-        results_file.write("Input data" + "," + input_data + "\n")
-        results_file.write("user" + "," + user + "\n")
-        results_file.write("function" + "," + func + "\n")
-        results_file.write("async toggle" + "," + str(async_toggle) + "\n")
-        results_file.write("forbid ndp" + "," + str(forbid_ndp) + "\n")
-        results_file.write("load balance strategy" + "," + load_balance_strategy + "\n")
-        results_file.write("iteration, latency\n")
-        for i in range(0, number_iterations):
-            print("Iteration: {}/{}".format(i, number_iterations))
-            latency = dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_toggle, forbid_ndp)
-            results_file.write(str(i) + "," + str(latency) + "\n")
-   
+
 @task
 def update(ctx, user, func, clean=False, debug=False, native=False):
     """
