@@ -101,7 +101,7 @@ def throughput_test(ctx, user, rados_func, input_data, load_balance_strategy, n,
         result_dict = {
             "batch_size": i,
             "mean_latency" : sum(latencies)/len(latencies),
-            "median_latency": latencies[len(latencies)//2],
+            "median_latency": sorted(latencies)[len(latencies)//2],
             "time_taken": end_time - start_time            
         }
         
