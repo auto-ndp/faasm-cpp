@@ -36,7 +36,7 @@ def test_load_balancer(ctx, user, rados_func, input_data, load_balance_strategy,
     with open(fp, "a") as results_file:
         results_file.write("Input data" + "," + input_data + "\n")
         results_file.write("user" + "," + user + "\n")
-        results_file.write("function" + "," + func + "\n")
+        results_file.write("function" + "," + rados_func + "\n")
         results_file.write("async toggle" + "," + str(async_toggle) + "\n")
         results_file.write("forbid ndp" + "," + str(forbid_ndp) + "\n")
         results_file.write("load balance strategy" + "," + load_balance_strategy + "\n")
@@ -61,12 +61,12 @@ async def batch_send(url, data, headers, batch_size, latencies):
         return responses
 
 @task
-def throughput_test(ctx, user, func, input_data, load_balance_strategy, n, async_toggle, forbid_ndp):
+def throughput_test(ctx, user, rados_func, input_data, load_balance_strategy, n, async_toggle, forbid_ndp):
     
     results = []
     
     data = {
-        "function": func,
+        "function": rados_func,
         "user": user,
         "input_data": input_data
     }
@@ -98,11 +98,11 @@ def throughput_test(ctx, user, func, input_data, load_balance_strategy, n, async
         
     # Save results to timestamped file
     timestamp = time.strftime("%Y%m%d-%H%M%S")
-    with open(f"./experiments/results/{timestamp}_{func}_{load_balance_strategy}_{forbid_ndp}", "a") as f:
+    with open(f"./experiments/results/{timestamp}_{rados_func}_{load_balance_strategy}_{forbid_ndp}", "a") as f:
         
         # Write header containing all metadata
         f.write("User,{user},\n")
-        f.write("Function,{func},\n")
+        f.write("Function,{rados_func},\n")
         f.write("Input Data,{input_data},\n")
         f.write("Num Runs,{num_runs},\n")
         f.write("Load Balance Strategy,{load_balance_strategy},\n")
@@ -115,7 +115,7 @@ def throughput_test(ctx, user, func, input_data, load_balance_strategy, n, async
             f.write(f"{result['batch_size']},{result['mean_latency']},{result['median_latency']},{result['time_taken']},\n")
         
 @task
-def gather_loads(ctx, user, func, input_data, n):
+def gather_loads(ctx, user, rados_func, input_data, n):
     load_balancer = METRICS_LOAD_BALANCER
     
     pass
