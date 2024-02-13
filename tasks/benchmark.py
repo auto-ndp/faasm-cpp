@@ -19,16 +19,6 @@ def test_load_balancer(ctx, user, rados_func, input_data, load_balance_strategy,
     
     number_iterations = int(n)
     
-    if async_toggle.lower() == "true":
-        async_toggle = True
-    else:
-        async_toggle = False
-        
-    if forbid_ndp.lower() == "true":
-        forbid_ndp = True
-    else:
-        forbid_ndp = False
-        
     # create file to store results
     fp = "./experiments/results/" + time.strftime("%Y%m%d-%H%M%S") + "_" + load_balance_strategy + "_results.csv"
     results_file = open(fp, "a")
