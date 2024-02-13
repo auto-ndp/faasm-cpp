@@ -46,7 +46,7 @@ async def batch_send(data, headers, batch_size):
     async with aiohttp.ClientSession() as session:
         tasks = []
         for _ in range(batch_size):
-            worker_id = WORKER_HASH_BALANCER.get_next_host()
+            worker_id = SELECTED_BALANCER.get_next_host(data["user"], data["function"])
             url = "http://{}:{}/f/".format(worker_id, 8080)
             tasks.append(dispatch_func_async(session, url, data, headers))
             await asyncio.sleep(1/batch_size)
