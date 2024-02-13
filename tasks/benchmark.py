@@ -113,13 +113,13 @@ def throughput_test(ctx, user, rados_func, input_data, load_balance_strategy, n,
     with open(f"./experiments/results/{timestamp}_{rados_func}_{load_balance_strategy}_{forbid_ndp}", "a") as f:
         
         # Write header containing all metadata
-        f.write("User,{user},\n")
-        f.write("Function,{rados_func},\n")
-        f.write("Input Data,{input_data},\n")
-        f.write("Num Runs,{num_runs},\n")
-        f.write("Load Balance Strategy,{load_balance_strategy},\n")
-        f.write("Async Toggled,{async_toggle},\n")
-        f.write("Forbid NDP,{forbid_ndp},\n")
+        f.write("User,{user}\n")
+        f.write("Function,{rados_func}\n")
+        f.write("Input Data,{input_data}\n")
+        f.write("Num Runs,{num_runs}\n")
+        f.write("Load Balance Strategy,{load_balance_strategy}\n")
+        f.write("Async Toggled,{async_toggle}\n")
+        f.write("Forbid NDP,{forbid_ndp}\n")
         
         
         f.write("Batch Size,Mean Latency,Median Latency,Time Taken\n")        
