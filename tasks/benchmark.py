@@ -14,6 +14,8 @@ ROUND_ROBIN_BALANCER = RoundRobinLoadBalancerStrategy(['worker-0', 'worker-1', '
 WORKER_HASH_BALANCER = WorkerHashLoadBalancerStrategy(['worker-0', 'worker-1', 'worker-2'])
 METRICS_LOAD_BALANCER = MetricsLoadBalancer(['worker-0', 'worker-1', 'worker-2'])
 
+
+SELECTED_BALANCER = ROUND_ROBIN_BALANCER
 @task
 def test_load_balancer(ctx, user, rados_func, input_data, load_balance_strategy, n, async_toggle, forbid_ndp):
     
@@ -44,7 +46,8 @@ async def batch_send(data, headers, batch_size):
     async with aiohttp.ClientSession() as session:
         tasks = []
         for _ in range(batch_size):
-            url = ROUND_ROBIN_BALANCER.get_next_host()
+            worker_id = WORKER_HASH_BALANCER.get_next_host()
+            url = "http://{}:{}/f/".format(worker_id, 8080)
             tasks.append(dispatch_func_async(session, url, data, headers))
             await asyncio.sleep(1/batch_size)
 
@@ -56,6 +59,8 @@ def throughput_test(ctx, user, rados_func, input_data, load_balance_strategy, n,
     
     results = []
     
+    CURRENT_BALANCER = func.get_load_balancer(load_balance_strategy)
+    print("Getting load balancer: ", CURRENT_BALANCER)
     data = {
         "function": rados_func,
         "user": user,
