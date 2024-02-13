@@ -64,7 +64,16 @@ def throughput_test(ctx, user, rados_func, input_data, load_balance_strategy, n,
     
     results = []
     
-    CURRENT_BALANCER = func.get_load_balancer(load_balance_strategy)
+    if load_balance_strategy.lower() == "roundrobin":
+        CURRENT_BALANCER = ROUND_ROBIN_BALANCER
+    elif load_balance_strategy.lower() == "workerhash":
+        CURRENT_BALANCER = WORKER_HASH_BALANCER
+    elif load_balance_strategy.lower() == "metrics":
+        CURRENT_BALANCER = METRICS_LOAD_BALANCER
+    else:
+        print("Invalid load balancer strategy: ", load_balance_strategy)
+        exit(1)
+        
     print("Getting load balancer: ", CURRENT_BALANCER)
     data = {
         "function": rados_func,
