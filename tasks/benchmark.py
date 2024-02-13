@@ -40,10 +40,11 @@ async def dispatch_func_async(session, url, data, headers):
     async with session.post(url, json=data, headers=headers) as response:
         return await response.text()
    
-async def batch_send(url, data, headers, batch_size, latencies):
+async def batch_send(data, headers, batch_size, latencies):
     async with aiohttp.ClientSession() as session:
         tasks = []
         for _ in range(batch_size):
+            url = ROUND_ROBIN_BALANCER.get_next_host()
             tasks.append(dispatch_func_async(session, url, data, headers))
             await asyncio.sleep(1/batch_size)
 
