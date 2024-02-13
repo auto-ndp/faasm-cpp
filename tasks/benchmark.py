@@ -56,7 +56,6 @@ async def batch_send(data, headers, batch_size, load_balancer):
             # await asyncio.sleep(1/batch_size)
 
         responses = await asyncio.gather(*tasks)
-        print("Responses: ", responses)
         return responses
 
 @task
