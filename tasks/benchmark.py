@@ -39,10 +39,10 @@ def test_load_balancer(ctx, user, rados_func, input_data, load_balance_strategy,
             results_file.write(str(i) + "," + str(latency) + "\n")
 
 async def dispatch_func_async(session, url, data, headers):
+    start_time = time.perf_counter()
     async with session.post(url, json=data, headers=headers) as response:
-        start_time = time.perf_counter()
-        await response.text()
         end_time = time.perf_counter()
+        await response.text()
         return end_time - start_time
    
 async def batch_send(data, headers, batch_size):
