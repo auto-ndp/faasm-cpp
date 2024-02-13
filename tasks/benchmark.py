@@ -51,7 +51,6 @@ async def batch_send(data, headers, batch_size, load_balancer):
         tasks = []
         for _ in range(batch_size):
             worker_id = load_balancer.get_next_host(data["user"], data["function"])
-            print("Worker ID: ", worker_id)
             url = "http://{}:{}/f/".format(worker_id, 8080)
             tasks.append(dispatch_func_async(session, url, data, headers))
             # await asyncio.sleep(1/batch_size)
@@ -94,6 +93,7 @@ def throughput_test(ctx, user, rados_func, input_data, load_balance_strategy, n,
     for i in range(1, ITERATIONS):
         latencies = []
         start_time = time.perf_counter()
+        print("Running a batch of size: ", i)
         latencies = asyncio.run(batch_send(data, headers, i, selected_balancer))
         end_time = time.perf_counter()
         print("Time taken to run batch: ", end_time - start_time)
