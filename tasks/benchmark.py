@@ -40,10 +40,14 @@ def test_load_balancer(ctx, user, rados_func, input_data, load_balance_strategy,
 
 async def dispatch_func_async(session, url, data, headers):
     async with session.post(url, json=data, headers=headers) as response:
-        return await response.text()
+        start_time = time.perf_counter()
+        await response.text()
+        end_time = time.perf_counter()
+        return end_time - start_time
    
 async def batch_send(data, headers, batch_size):
     async with aiohttp.ClientSession() as session:
+        latencies = []
         tasks = []
         for _ in range(batch_size):
             worker_id = SELECTED_BALANCER.get_next_host(data["user"], data["function"])
