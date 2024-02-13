@@ -15,7 +15,8 @@ WORKER_HASH_BALANCER = WorkerHashLoadBalancerStrategy(['worker-0', 'worker-1', '
 METRICS_LOAD_BALANCER = MetricsLoadBalancer(['worker-0', 'worker-1', 'worker-2'])
 
 
-SELECTED_BALANCER = ROUND_ROBIN_BALANCER
+selected_balancer = ROUND_ROBIN_BALANCER
+
 @task
 def test_load_balancer(ctx, user, rados_func, input_data, load_balance_strategy, n, async_toggle, forbid_ndp):
     
@@ -45,11 +46,11 @@ async def dispatch_func_async(session, url, data, headers):
         await response.text()
         return end_time - start_time
    
-async def batch_send(data, headers, batch_size):
+async def batch_send(data, headers, batch_size, load_balancer):
     async with aiohttp.ClientSession() as session:
         tasks = []
         for _ in range(batch_size):
-            worker_id = SELECTED_BALANCER.get_next_host(data["user"], data["function"])
+            worker_id = load_balancer.get_next_host(data["user"], data["function"])
             print("Worker ID: ", worker_id)
             url = "http://{}:{}/f/".format(worker_id, 8080)
             tasks.append(dispatch_func_async(session, url, data, headers))
@@ -65,16 +66,16 @@ def throughput_test(ctx, user, rados_func, input_data, load_balance_strategy, n,
     results = []
     
     if load_balance_strategy.lower() == "roundrobin":
-        SELECTED_BALANCER = ROUND_ROBIN_BALANCER
+        selected_balancer = ROUND_ROBIN_BALANCER
     elif load_balance_strategy.lower() == "workerhash":
-        SELECTED_BALANCER = WORKER_HASH_BALANCER
+        selected_balancer = WORKER_HASH_BALANCER
     elif load_balance_strategy.lower() == "metrics":
-        SELECTED_BALANCER = METRICS_LOAD_BALANCER
+        selected_balancer = METRICS_LOAD_BALANCER
     else:
         print("Invalid load balancer strategy: ", load_balance_strategy)
         exit(1)
         
-    print("Getting load balancer: ", SELECTED_BALANCER)
+    print("Getting load balancer: ", selected_balancer)
     data = {
         "function": rados_func,
         "user": user,
@@ -93,7 +94,7 @@ def throughput_test(ctx, user, rados_func, input_data, load_balance_strategy, n,
     for i in range(1, ITERATIONS):
         latencies = []
         start_time = time.perf_counter()
-        latencies = asyncio.run(batch_send(data, headers, i))
+        latencies = asyncio.run(batch_send(data, headers, i, selected_balancer))
         end_time = time.perf_counter()
         print("Time taken to run batch: ", end_time - start_time)
         
