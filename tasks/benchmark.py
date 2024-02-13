@@ -86,6 +86,7 @@ def throughput_test(ctx, user, rados_func, input_data, load_balance_strategy, n,
         data["async"] = True
     
     if forbid_ndp.lower() == "true":
+        print("Forbidding NDP:")
         data["forbid_ndp"] = True
     
     ITERATIONS = int(n)
