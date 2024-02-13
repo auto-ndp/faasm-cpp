@@ -18,4 +18,3 @@ do
         rados put -p ndp $filename $file
     fi
 done
-```

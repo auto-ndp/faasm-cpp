@@ -68,8 +68,9 @@ def throughput_test(ctx, user, rados_func, input_data, load_balance_strategy, n,
     
     if forbid_ndp.lower() == "true":
         forbid_ndp = True
-        
-    for i in range(0, n):
+    
+    ITERATIONS = int(n)
+    for i in range(0, ITERATIONS):
         latencies = []
         start_time = time.perf_counter()
         asyncio.run(batch_send(data, headers, i, latencies))
