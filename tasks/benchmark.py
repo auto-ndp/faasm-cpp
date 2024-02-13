@@ -15,7 +15,7 @@ WORKER_HASH_BALANCER = WorkerHashLoadBalancerStrategy(['worker-0', 'worker-1', '
 METRICS_LOAD_BALANCER = MetricsLoadBalancer(['worker-0', 'worker-1', 'worker-2'])
 
 @task
-def test_load_balancer(ctx, user, func, input_data, load_balance_strategy, n, async_toggle, forbid_ndp):
+def test_load_balancer(ctx, user, rados_func, input_data, load_balance_strategy, n, async_toggle, forbid_ndp):
     
     number_iterations = int(n)
     
@@ -43,7 +43,7 @@ def test_load_balancer(ctx, user, func, input_data, load_balance_strategy, n, as
         results_file.write("iteration, latency\n")
         for i in range(0, number_iterations):
             print("Iteration: {}/{}".format(i, number_iterations))
-            latency = func.dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_toggle, forbid_ndp)
+            latency = func.dispatch_function(ctx, user, rados_func, input_data, load_balance_strategy, async_toggle, forbid_ndp)
             results_file.write(str(i) + "," + str(latency) + "\n")
 
 async def dispatch_func_async(session, url, data, headers):
