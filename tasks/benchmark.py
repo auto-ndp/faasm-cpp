@@ -83,10 +83,10 @@ def throughput_test(ctx, user, rados_func, input_data, load_balance_strategy, n,
     headers = { "Content-Type" : "application/json" }
     
     if async_toggle.lower() == "true":
-        async_toggle = True
+        data["async"] = True
     
     if forbid_ndp.lower() == "true":
-        forbid_ndp = True
+        data["forbid_ndp"] = True
     
     ITERATIONS = int(n)
     for i in range(1, ITERATIONS):
