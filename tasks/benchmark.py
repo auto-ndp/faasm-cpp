@@ -47,7 +47,6 @@ async def dispatch_func_async(session, url, data, headers):
    
 async def batch_send(data, headers, batch_size):
     async with aiohttp.ClientSession() as session:
-        latencies = []
         tasks = []
         for _ in range(batch_size):
             worker_id = SELECTED_BALANCER.get_next_host(data["user"], data["function"])
@@ -56,6 +55,7 @@ async def batch_send(data, headers, batch_size):
             await asyncio.sleep(1/batch_size)
 
         responses = await asyncio.gather(*tasks)
+        print("Responses: ", responses)
         return responses
 
 @task
@@ -83,9 +83,7 @@ def throughput_test(ctx, user, rados_func, input_data, load_balance_strategy, n,
     for i in range(1, ITERATIONS):
         latencies = []
         start_time = time.perf_counter()
-        results = asyncio.run(batch_send(data, headers, i))
-        latencies.append(sum(results)/len(results))
-        print("Average latency: ", sum(latencies)/len(latencies))
+        latencies = asyncio.run(batch_send(data, headers, i))
         end_time = time.perf_counter()
         print("Time taken to run batch: ", end_time - start_time)
         
