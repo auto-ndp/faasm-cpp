@@ -17,6 +17,7 @@ from faasmtools.endpoints import (
 from faasmtools.compile_util import wasm_cmake, wasm_copy_upload
 from faasmloadbalancer.RoundRobinLoadBalancer import RoundRobinLoadBalancerStrategy
 from faasmloadbalancer.WorkerHashLoadBalancer import WorkerHashLoadBalancerStrategy
+from faasmloadbalancer.MetricsLoadBalancer import MetricsLoadBalancer
 
 FAABRIC_MSG_TYPE_FLUSH = 3
 
@@ -28,6 +29,7 @@ WORKER_ADDRESSES = ['worker-0', 'worker-1', 'worker-2']
 
 round_robin_balancer = RoundRobinLoadBalancerStrategy(WORKER_ADDRESSES)
 worker_hash_balancer = WorkerHashLoadBalancerStrategy(WORKER_ADDRESSES)
+load_average_balancer = MetricsLoadBalancer(WORKER_ADDRESSES)
 
 def _get_all_user_funcs(user):
     # Work out all the functions for this user (that we assume will have been
@@ -274,6 +276,9 @@ def get_load_balancer(strategy_name: str):
     elif (strategy_name.lower() == "workerhash" or strategy_name.lower() == "worker_hash"):
         print("Using worker hash load balancer")
         return worker_hash_balancer
+    elif (strategy_name.lower() == "metrics" or strategy_name.lower() == "metricsloadbalancer"):
+        print("Using metrics load balancer")
+        return metrics_balancer
     else:
         print("Invalid load balancer strategy name: {}".format(strategy_name))
         print("Returning round robin load balancer by default")

@@ -5,6 +5,7 @@ class MetricsLoadBalancer(ILoadBalanceStrategy):
         self.workers = workers
 
     def _request_load_average(self, worker):
+        
         pass
         
     def get_next_host(self, user=None, func_name=None):

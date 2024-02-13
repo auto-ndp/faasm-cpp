@@ -6,11 +6,13 @@ import aiohttp
 
 from faasmloadbalancer.RoundRobinLoadBalancer import RoundRobinLoadBalancerStrategy
 from faasmloadbalancer.WorkerHashLoadBalancer import WorkerHashLoadBalancerStrategy
+from faasmloadbalancer.MetricsLoadBalancer import MetricsLoadBalancer
 
 from func import get_load_balancer, dispatch_function
 
 ROUND_ROBIN_BALANCER = RoundRobinLoadBalancerStrategy(['worker-0', 'worker-1', 'worker-2'])
 WORKER_HASH_BALANCER = WorkerHashLoadBalancerStrategy(['worker-0', 'worker-1', 'worker-2'])
+METRICS_LOAD_BALANCER = MetricsLoadBalancer(['worker-0', 'worker-1', 'worker-2'])
 
 @task
 def test_load_balancer(ctx, user, func, input_data, load_balance_strategy, n, async_toggle, forbid_ndp):
@@ -112,5 +114,8 @@ def throughput_test(ctx, user, func, input_data, load_balance_strategy, n, async
         for result in results:
             f.write(f"{result['batch_size']},{result['mean_latency']},{result['median_latency']},{result['time_taken']},\n")
         
+@task
+def gather_loads(ctx, user, func, input_data, n):
+    load_balancer = METRICS_LOAD_BALANCER
     
-    
+    pass
