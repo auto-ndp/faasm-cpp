@@ -14,12 +14,14 @@ from . import libfaasmpi
 from . import libfake
 from . import libffi
 from . import zlib
+from . import benchmark
 
 ns = Collection(
     clapack,
     docker,
     format_code,
     func,
+    benchmark,
     git,
     install,
     libc,
