@@ -188,6 +188,16 @@ def dispatch_function(ctx, user, func, input_data, load_balance_strategy, async_
         data["record_exec_graph"] = True
         data["async"] = True
 
+    if async_toggle.lower() == "true":
+        data["async"] = True
+    else:
+        data["async"] = False
+        
+    if forbid_ndp.lower() == "true":
+        data["forbid_ndp"] = True
+    else:
+        data["forbid_ndp"] = False
+        
     print("Async: {}".format(data['async']))
     print("Forbid_ndp: {}".format(data['forbid_ndp']))
     # headers = get_knative_headers()
