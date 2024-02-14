@@ -55,7 +55,7 @@ async def batch_send(data, headers, batch_size, load_balancer):
                 worker_id = load_balancer.get_next_host(data["user"], data["function"])
             url = "http://{}:{}/f/".format(worker_id, 8080)
             tasks.append(dispatch_func_async(session, url, data, headers))
-            # await asyncio.sleep(1/batch_size)
+            await asyncio.sleep(1/batch_size)
 
         responses = await asyncio.gather(*tasks)
         return responses
