@@ -82,9 +82,7 @@ int worker(const string_view objKey, std::vector<char>& outputBuf)
         sortedCounts.push_back(
           std::make_pair(std::string(std::move(pair.first)), pair.second));
     }
-    std::sort(sortedCounts.begin(), sortedCounts.end(), [(const uint32_t& a, const uint32_t& b)]{
-        return a.second > b.second;
-    });
+    std::sort(sortedCounts.begin(), sortedCounts.end());
     char fmtNumber[16];
     outputBuf.reserve(outSz);
     for (const auto& pair : sortedCounts) {
