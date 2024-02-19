@@ -10,6 +10,10 @@ DEFAULT_UPLOAD_HOST = "upload"
 DEFAULT_INVOKE_PORT = 8080
 DEFAULT_UPLOAD_PORT = 8002
 
+def get_all_worker_addresses():
+    parser = ConfigParser()
+    parser.read(FAASM_INI_FILE)
+    return parser["Faasm"].get("ALL_WORKERS", "").split(",")
 
 def faasm_config_exists():
     return exists(FAASM_INI_FILE)
