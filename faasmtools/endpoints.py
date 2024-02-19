@@ -12,10 +12,28 @@ DEFAULT_UPLOAD_PORT = 8002
 
 
 def get_all_worker_addresses():
-    return ["worker-0", "worker-1", "worker-2"]
+    faasm_config_exists_or_create()
+    
+    all_workers = get_faasm_ini_value("Faasm", "all_workers").split(",")
+    return all_workers
 
-def faasm_config_exists():
-    return exists(FAASM_INI_FILE)
+def faasm_config_exists_or_create():
+    if not exists(FAASM_INI_FILE):
+        # Create the file if it doesn't exist
+        ConfigParser().write(FAASM_INI_FILE)
+        
+        # Set Faasm upload and invoke hosts
+        config = ConfigParser()
+        config.read(FAASM_INI_FILE)
+        config["Faasm"] = {
+            "upload_host": DEFAULT_UPLOAD_HOST,
+            "upload_port": DEFAULT_UPLOAD_PORT,
+            "invoke_host": DEFAULT_INVOKE_HOST,
+            "invoke_port": DEFAULT_INVOKE_PORT,
+            "all_workers": "worker-0,worker-1,worker-2",
+        }
+        with open(FAASM_INI_FILE, "w") as fh:
+            config.write(fh)
 
 
 def get_faasm_ini_value(section, key):
@@ -29,8 +47,7 @@ def get_faasm_ini_value(section, key):
 
 
 def get_faasm_upload_host_port():
-    if not faasm_config_exists():
-        return DEFAULT_UPLOAD_HOST, DEFAULT_UPLOAD_PORT
+    faasm_config_exists_or_create()
 
     host = get_faasm_ini_value("Faasm", "upload_host")
     port = get_faasm_ini_value("Faasm", "upload_port")
@@ -39,9 +56,8 @@ def get_faasm_upload_host_port():
 
 
 def get_faasm_invoke_host_port():
-    if not faasm_config_exists():
-        return DEFAULT_INVOKE_HOST, DEFAULT_INVOKE_PORT
-
+    faasm_config_exists_or_create()
+    
     host = get_faasm_ini_value("Faasm", "invoke_host")
     port = get_faasm_ini_value("Faasm", "invoke_port")
 
@@ -49,9 +65,8 @@ def get_faasm_invoke_host_port():
 
 
 def get_knative_headers():
-    if not faasm_config_exists():
-        return DEFAULT_KNATIVE_HEADERS
-
+    faasm_config_exists_or_create()
+    
     knative_host = get_faasm_ini_value("Faasm", "knative_host")
 
     headers = {"Host": knative_host}
