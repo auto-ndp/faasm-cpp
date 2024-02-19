@@ -13,7 +13,7 @@ DEFAULT_UPLOAD_PORT = 8002
 def get_all_worker_addresses():
     parser = ConfigParser()
     parser.read(FAASM_INI_FILE)
-    return parser["Faasm"].get("ALL_WORKERS", "").split(",")
+    return parser["Faasm"].get("all_workers", "").split(",")
 
 def faasm_config_exists():
     return exists(FAASM_INI_FILE)
