@@ -115,9 +115,7 @@ def invoke(ctx, user, func, input_data, mpi=None, graph=False):
     """
     Invoke a given function
     """
-    # host, port = get_faasm_invoke_host_port()
-    host = "worker-0"
-    port = 8080
+    host, port = get_faasm_invoke_host_port()
     url = "http://{}:{}/f/".format(host, port)
     data = {
         "function": func,
