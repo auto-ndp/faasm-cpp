@@ -11,6 +11,9 @@ DEFAULT_INVOKE_PORT = 8080
 DEFAULT_UPLOAD_PORT = 8002
 
 
+def get_all_worker_addresses():
+    return ["worker-0", "worker-1", "worker-2"]
+
 def faasm_config_exists():
     return exists(FAASM_INI_FILE)
 

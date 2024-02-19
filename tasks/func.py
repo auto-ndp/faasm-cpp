@@ -11,6 +11,7 @@ from faasmtools.endpoints import (
     get_faasm_invoke_host_port,
     get_faasm_upload_host_port,
     get_knative_headers,
+    get_all_worker_addresses,
 )
 
 # Load Balancer imports
@@ -25,7 +26,7 @@ FUNC_DIR = join(PROJ_ROOT, "func")
 FUNC_BUILD_DIR = join(PROJ_ROOT, "build", "func")
 NATIVE_FUNC_BUILD_DIR = join(PROJ_ROOT, "build", "native-func")
 
-WORKER_ADDRESSES = ['worker-0', 'worker-1', 'worker-2']
+WORKER_ADDRESSES = get_all_worker_addresses()
 
 round_robin_balancer = RoundRobinLoadBalancerStrategy(WORKER_ADDRESSES)
 worker_hash_balancer = WorkerHashLoadBalancerStrategy(WORKER_ADDRESSES)
