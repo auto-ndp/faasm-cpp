@@ -32,7 +32,7 @@ def faasm_config_exists_or_create():
             "invoke_port": DEFAULT_INVOKE_PORT,
             "all_workers": "worker-0,worker-1,worker-2",
         }
-        with open(FAASM_INI_FILE, "w") as fh:
+        with open(FAASM_INI_FILE, "a") as fh:
             config.write(fh)
 
 
