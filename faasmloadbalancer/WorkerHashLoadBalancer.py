@@ -6,11 +6,11 @@ class WorkerHashLoadBalancerStrategy(ILoadBalanceStrategy):
 
     def get_next_host(self, user=None, func=None) -> str:
         # Calculate the hash of the task ID
-        # hash_value = hash(user + func)
-# 
-        # # Get the index of the worker based on the hash value
-        # worker_index = hash_value % len(self.workers)
-# 
-        # #Return the worker ID
-        return self.workers[0]
+        hash_value = hash(user + func)
+
+        # Get the index of the worker based on the hash value
+        worker_index = hash_value % len(self.workers)
+
+        #Return the worker ID
+        return self.workers[worker_index]
         
