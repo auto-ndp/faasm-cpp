@@ -7,13 +7,13 @@ import aiohttp
 from faasmloadbalancer.RoundRobinLoadBalancer import RoundRobinLoadBalancerStrategy
 from faasmloadbalancer.WorkerHashLoadBalancer import WorkerHashLoadBalancerStrategy
 from faasmloadbalancer.MetricsLoadBalancer import MetricsLoadBalancer
-
+from faasmtools.endpoints import get_all_worker_addresses()
 from . import func
 import threading
 
-ROUND_ROBIN_BALANCER = RoundRobinLoadBalancerStrategy(['worker-0', 'worker-1', 'worker-2'])
-WORKER_HASH_BALANCER = WorkerHashLoadBalancerStrategy(['worker-0', 'worker-1', 'worker-2'])
-METRICS_LOAD_BALANCER = MetricsLoadBalancer(['worker-0', 'worker-1', 'worker-2'])
+WORKER_ADDRESSES = get_all_worker_addresses()
+ROUND_ROBIN_BALANCER = RoundRobinLoadBalancerStrategy(WORKER_ADDRESSES)
+WORKER_HASH_BALANCER = WorkerHashLoadBalancerStrategy(WORKER_ADDRESSES)
 
 
 selected_balancer = ROUND_ROBIN_BALANCER
@@ -57,7 +57,7 @@ async def batch_send(data, headers, batch_size, load_balancer):
                 tasks.append(dispatch_func_async(session, url, data, headers))
             await asyncio.sleep(1/batch_size)
 
-        responses = await asyncio.gather(*tasks)
+        responses= await asyncio.gather(*tasks)
         return responses
 
 @task
