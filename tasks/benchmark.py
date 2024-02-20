@@ -7,7 +7,7 @@ import aiohttp
 from faasmloadbalancer.RoundRobinLoadBalancer import RoundRobinLoadBalancerStrategy
 from faasmloadbalancer.WorkerHashLoadBalancer import WorkerHashLoadBalancerStrategy
 from faasmloadbalancer.MetricsLoadBalancer import MetricsLoadBalancer
-from faasmtools.endpoints import get_all_worker_addresses()
+from faasmtools.endpoints import get_all_worker_addresses
 from . import func
 import threading
 
