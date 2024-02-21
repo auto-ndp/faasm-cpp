@@ -111,7 +111,7 @@ def upload_user(ctx, user):
 
 
 @task
-def invoke(ctx, user, func, input_data, mpi=None, graph=False):
+def invoke(ctx, user, func, input_data, mpi=None, graph=False, forbid_ndp=False):
     """
     Invoke a given function
     """
@@ -134,7 +134,9 @@ def invoke(ctx, user, func, input_data, mpi=None, graph=False):
     if graph:
         data["record_exec_graph"] = True
         data["async"] = True
-
+    
+    if forbid_ndp:
+        data["forbid_ndp"] = forbid_ndp
     # headers = get_knative_headers()
     headers =  { "Content-Type" : "application/json" }
     print("Headers: {}".format(headers))
