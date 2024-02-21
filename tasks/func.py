@@ -145,6 +145,7 @@ def invoke(ctx, user, func, input_data, mpi=None, graph=False):
         print("Error ({}):\n{}".format(response.status_code, response.text))
         exit(1)
         
+    print("Response: {}".format(response.text))
     print("Latency: {}".format(response.elapsed.total_seconds()))
     print("-----------------------------")
     
